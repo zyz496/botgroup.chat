@@ -34,17 +34,19 @@ const getAvatarData = (name: string) => {
 };
 
 const ChatUI = () => {
+  // 添加 AI 角色定义
+  const aiCharacters = [
+    { id: 'ai1', name: "暖心姐", personality: "high_eq" },
+    { id: 'ai2', name: "直男哥", personality: "low_eq" }
+  ];
+
   const [users, setUsers] = useState([
-    { id: 1, name: "张三" },
-    { id: 2, name: "李四" },
-    { id: 3, name: "王五" },
-    { id: 4, name: "赵六" },
-    { id: 5, name: "我" },
+    { id: 1, name: "我" },
+    ...aiCharacters
   ]);
   const [showMembers, setShowMembers] = useState(false);
   const [messages, setMessages] = useState([
-    { id: 1, sender: users[0], content: "大家好！", isAI: false },
-    { id: 2, sender: users[4], content: "你好！", isAI: false },
+
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +56,7 @@ const ChatUI = () => {
   const currentMessageRef = useRef<number | null>(null);
   const typewriterRef = useRef<NodeJS.Timeout | null>(null);
   const accumulatedContentRef = useRef(""); // 用于跟踪完整内容
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const abortController = new AbortController();
 
@@ -102,130 +105,121 @@ const ChatUI = () => {
     }, typingSpeed);
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
+    // 添加用户消息
     const userMessage = {
       id: messages.length + 1,
-      sender: users[4],
+      sender: users[0],
       content: inputMessage,
       isAI: false
     };
     setMessages(prev => [...prev, userMessage]);
-    
-    const aiMessage = {
-      id: messages.length + 2,
-      sender: { id: 0, name: "AI助手" },
-      content: "",
-      isAI: true
-    };
-    setMessages(prev => [...prev, aiMessage]);
-    
     setInputMessage("");
     setIsLoading(true);
+    setPendingContent("");
+    accumulatedContentRef.current = "";
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: inputMessage,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('请求失败');
-      }
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (!reader) {
-        throw new Error('无法获取响应流');
-      }
-
-      let buffer = '';
+    // 依次请求两个 AI 的回复
+    for (let i = 0; i < aiCharacters.length; i++) {
+      // 创建当前 AI 角色的消息
+      const aiMessage = {
+        id: messages.length + 2 + i,
+        sender: { id: aiCharacters[i].id, name: aiCharacters[i].name },
+        content: "",
+        isAI: true
+      };
       
-      while (true) {
-        const { done, value } = await reader.read();
-        
-        if (done) break;
-        
-        // 解码并添加到buffer
-        buffer += decoder.decode(value, { stream: true });
-        
-        // 处理buffer中的完整SSE消息
-        let newlineIndex;
-        while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
-          const line = buffer.slice(0, newlineIndex);
-          buffer = buffer.slice(newlineIndex + 1);
-          
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              if (data.content) {
-                // 使用函数式更新确保状态更新正确
-                setMessages(prev => {
-                  const newMessages = [...prev];
-                  const aiMessageIndex = newMessages.findIndex(msg => msg.id === aiMessage.id);
-                  if (aiMessageIndex !== -1) {
-                    newMessages[aiMessageIndex] = {
-                      ...newMessages[aiMessageIndex],
-                      content: newMessages[aiMessageIndex].content + data.content
-                    };
-                  }
-                  return newMessages;
-                });
+      // 添加当前 AI 的消息
+      setMessages(prev => [...prev, aiMessage]);
 
-                // 滚动到底部
-                setTimeout(() => {
-                  const chatContainer = document.querySelector('.scroll-area-viewport');
-                  if (chatContainer) {
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                  }
-                }, 0);
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: inputMessage,
+            personality: aiCharacters[i].personality,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('请求失败');
+        }
+
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+
+        if (!reader) {
+          throw new Error('无法获取响应流');
+        }
+
+        let buffer = '';
+        let completeResponse = ''; // 用于跟踪完整的响应
+
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          
+          let newlineIndex;
+          while ((newlineIndex = buffer.indexOf('\n')) >= 0) {
+            const line = buffer.slice(0, newlineIndex);
+            buffer = buffer.slice(newlineIndex + 1);
+            
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.content) {
+                  completeResponse += data.content;
+                  setMessages(prev => {
+                    const newMessages = [...prev];
+                    const aiMessageIndex = newMessages.findIndex(msg => msg.id === aiMessage.id);
+                    if (aiMessageIndex !== -1) {
+                      newMessages[aiMessageIndex] = {
+                        ...newMessages[aiMessageIndex],
+                        content: completeResponse
+                      };
+                    }
+                    return newMessages;
+                  });
+                }
+              } catch (e) {
+                console.error('解析响应数据失败:', e);
               }
-            } catch (e) {
-              console.error('解析响应数据失败:', e);
             }
           }
         }
-      }
 
-      // 处理剩余的buffer
-      if (buffer.length > 0 && buffer.startsWith('data: ')) {
-        try {
-          const data = JSON.parse(buffer.slice(6));
-          if (data.content) {
-            setMessages(prev => {
-              const newMessages = [...prev];
-              const aiMessageIndex = newMessages.findIndex(msg => msg.id === aiMessage.id);
-              if (aiMessageIndex !== -1) {
-                newMessages[aiMessageIndex] = {
-                  ...newMessages[aiMessageIndex],
-                  content: newMessages[aiMessageIndex].content + data.content
-                };
-              }
-              return newMessages;
-            });
-          }
-        } catch (e) {
-          console.error('解析最终响应数据失败:', e);
+        // 等待一小段时间再开始下一个 AI 的回复
+        if (i < aiCharacters.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
-      }
 
-    } catch (error) {
-      console.error("发送消息失败:", error);
-      setMessages(prev => prev.map(msg => 
-        msg.id === aiMessage.id 
-          ? { ...msg, content: "错误: " + error.message, isError: true }
-          : msg
-      ));
-    } finally {
-      setIsLoading(false);
+      } catch (error) {
+        console.error("发送消息失败:", error);
+        setMessages(prev => prev.map(msg => 
+          msg.id === aiMessage.id 
+            ? { ...msg, content: "错误: " + error.message, isError: true }
+            : msg
+        ));
+      }
     }
+    
+    setIsLoading(false);
   };
 
   const handleCancel = () => {
@@ -248,7 +242,7 @@ const ChatUI = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Menu className="w-6 h-6" />
-            <h1 className="text-xl font-bold">技术交流群</h1>
+            <h1 className="text-xl font-bold">硅碳摸鱼群</h1>
           </div>
 
           <div className="flex items-center gap-2">
@@ -336,6 +330,7 @@ const ChatUI = () => {
                 )}
               </div>
             ))}
+            <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
 
