@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Menu, MoreHorizontal, UserPlus, UserMinus } from 'lucide-react';
+import { Send, Menu, MoreHorizontal, UserPlus, UserMinus, Users2, Users, MoreVertical, MessageCircle } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -26,11 +26,57 @@ import {
 // 使用本地头像数据，避免外部依赖
 const getAvatarData = (name: string) => {
   const colors = ['#1abc9c', '#3498db', '#9b59b6', '#f1c40f', '#e67e22'];
-  const index = name.charCodeAt(0) % colors.length;
+  const index = (name.charCodeAt(0) + (name.charCodeAt(1) || 0 )) % colors.length;
   return {
     backgroundColor: colors[index],
     text: name[0],
   };
+};
+
+// 单个完整头像
+const SingleAvatar = ({ user }: { user: User }) => {
+  const avatarData = getAvatarData(user.name);
+  return (
+    <div 
+      className="w-full h-full flex items-center justify-center text-xs text-white font-medium"
+      style={{ backgroundColor: avatarData.backgroundColor }}
+    >
+      {avatarData.text}
+    </div>
+  );
+};
+
+// 左右分半头像
+const HalfAvatar = ({ user, isFirst }: { user: User, isFirst: boolean }) => {
+  const avatarData = getAvatarData(user.name);
+  return (
+    <div 
+      className="w-1/2 h-full flex items-center justify-center text-xs text-white font-medium"
+      style={{ 
+        backgroundColor: avatarData.backgroundColor,
+        borderRight: isFirst ? '1px solid white' : 'none'
+      }}
+    >
+      {avatarData.text}
+    </div>
+  );
+};
+
+// 四分之一头像
+const QuarterAvatar = ({ user, index }: { user: User, index: number }) => {
+  const avatarData = getAvatarData(user.name);
+  return (
+    <div 
+      className="aspect-square flex items-center justify-center text-[8px] text-white font-medium"
+      style={{ 
+        backgroundColor: avatarData.backgroundColor,
+        borderRight: index % 2 === 0 ? '1px solid white' : 'none',
+        borderBottom: index < 2 ? '1px solid white' : 'none'
+      }}
+    >
+      {avatarData.text}
+    </div>
+  );
 };
 
 const ChatUI = () => {
@@ -236,73 +282,95 @@ const ChatUI = () => {
   }, []);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
+    <div className="h-[100dvh] flex flex-col bg-gray-100 fixed inset-0 overflow-hidden">
       {/* Header */}
-      <header className="bg-white p-4 shadow">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Menu className="w-6 h-6" />
-            <h1 className="text-xl font-bold">硅碳摸鱼群</h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Stacked Avatars */}
-            <div className="flex items-center">
-              <div className="flex -space-x-2">
-                {users.slice(0, 4).map((user) => {
-                  const avatarData = getAvatarData(user.name);
-                  return (
-                    <TooltipProvider key={user.id}>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <Avatar className="w-7 h-7 border-2 border-white">
-                            <AvatarFallback style={{ backgroundColor: avatarData.backgroundColor, color: 'white' }}>
-                              {avatarData.text}
-                            </AvatarFallback>
-                          </Avatar>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{user.name}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  );
-                })}
-                {users.length > 4 && (
-                  <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs border-2 border-white">
-                    +{users.length - 4}
+      <header className="bg-white shadow flex-none">
+        <div className="flex items-center justify-between px-4 py-3">
+          {/* 左侧群组信息 */}
+          <div className="flex items-center gap-1.5">
+            <div className="relative w-10 h-10">
+              <div className="w-full h-full rounded-full border-2 border-white overflow-hidden bg-white">
+                {users.length === 1 ? (
+                  // 单个成员时显示一个大头像
+                  <SingleAvatar user={users[0]} />
+                ) : users.length === 2 ? (
+                  // 两个成员时左右分布
+                  <div className="h-full flex">
+                    {users.slice(0, 2).map((user, index) => (
+                      <HalfAvatar key={user.id} user={user} isFirst={index === 0} />
+                    ))}
+                  </div>
+                ) : users.length === 3 ? (
+                  // 三个成员时上2下1
+                  <div className="h-full flex flex-col">
+                    <div className="flex h-1/2">
+                      {users.slice(0, 2).map((user, index) => (
+                        <HalfAvatar key={user.id} user={user} isFirst={index === 0} />
+                      ))}
+                    </div>
+                    <div className="h-1/2 flex justify-center">
+                      <SingleAvatar user={users[2]} />
+                    </div>
+                  </div>
+                ) : (
+                  // 四个或更多成员时显示2x2网格
+                  <div className="h-full grid grid-cols-2">
+                    {users.slice(0, 4).map((user, index) => (
+                      <QuarterAvatar key={user.id} user={user} index={index} />
+                    ))}
                   </div>
                 )}
               </div>
-              <span className="ml-2 text-sm text-gray-500">
-                {users.length} 人
-              </span>
+              <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 rounded-full border-2 border-white"></div>
             </div>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="w-5 h-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setShowMembers(true)}>
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  管理成员
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div>
+              <h1 className="font-medium text-base">硅碳摸鱼交流群</h1>
+              <p className="text-xs text-gray-500">{users.length} 名成员</p>
+            </div>
+          </div>
+          
+          {/* 右侧头像组和按钮 */}
+          <div className="flex items-center">
+            <div className="flex -space-x-2 ">
+              {users.slice(0, 4).map((user) => {
+                const avatarData = getAvatarData(user.name);
+                return (
+                  <TooltipProvider key={user.id}>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <Avatar className="w-7 h-7 border-2 border-white">
+                          <AvatarFallback style={{ backgroundColor: avatarData.backgroundColor, color: 'white' }}>
+                            {avatarData.text}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{user.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              })}
+              {users.length > 4 && (
+                <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs border-2 border-white">
+                  +{users.length - 4}
+                </div>
+              )}
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setShowMembers(true)}>
+              <Users className="w-5 h-5" />
+            </Button>
           </div>
         </div>
       </header>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <ScrollArea className="flex-1 p-4">
+      <div className="flex-1 overflow-hidden">
+        <ScrollArea className="h-full p-4">
           <div className="space-y-4">
             {messages.map((message) => (
               <div key={message.id} 
-                className={`flex items-start gap-3 ${message.sender.name === "我" ? "justify-end" : ""}`}>
+                className={`flex items-start gap-2 ${message.sender.name === "我" ? "justify-end" : ""}`}>
                 {message.sender.name !== "我" && (
                   <Avatar>
                     <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
@@ -333,29 +401,29 @@ const ChatUI = () => {
             <div ref={messagesEndRef} />
           </div>
         </ScrollArea>
+      </div>
 
-        {/* Input Area */}
-        <div className="p-4 bg-white border-t">
-          <div className="flex gap-2">
-            <Input 
-              placeholder="输入消息..." 
-              className="flex-1"
-              value={inputMessage}
-              onChange={(e) => setInputMessage(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-            />
-            <Button 
-              onClick={handleSendMessage}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              ) : (
-                <Send className="w-4 h-4 mr-2" />
-              )}
-              发送
-            </Button>
-          </div>
+      {/* Input Area */}
+      <div className="bg-white border-t pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 px-4">
+        <div className="flex gap-2">
+          <Input 
+            placeholder="输入消息..." 
+            className="flex-1"
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+          />
+          <Button 
+            onClick={handleSendMessage}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              <Send className="w-4 h-4 mr-2" />
+            )}
+            发送
+          </Button>
         </div>
       </div>
 
