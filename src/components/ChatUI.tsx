@@ -175,6 +175,13 @@ const ChatUI = () => {
     setPendingContent("");
     accumulatedContentRef.current = "";
 
+    // 构建历史消息数组
+    const messageHistory = messages.map(msg => ({
+      role: msg.isAI ? 'assistant' : 'user',
+      content: msg.content,
+      name: msg.sender.name
+    }));
+
     // 依次请求两个 AI 的回复
     for (let i = 0; i < aiCharacters.length; i++) {
       // 创建当前 AI 角色的消息
@@ -197,6 +204,8 @@ const ChatUI = () => {
           body: JSON.stringify({
             message: inputMessage,
             personality: aiCharacters[i].personality,
+            history: messageHistory,
+            aiName: aiCharacters[i].name
           }),
         });
 
