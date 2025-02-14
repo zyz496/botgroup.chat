@@ -10,12 +10,7 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from "@/components/ui/tooltip";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+
 import {
   Dialog,
   DialogContent,
@@ -83,7 +78,8 @@ const ChatUI = () => {
   // 添加 AI 角色定义
   const aiCharacters = [
     { id: 'ai1', name: "暖心姐", personality: "high_eq" },
-    { id: 'ai2', name: "直男哥", personality: "low_eq" }
+    { id: 'ai2', name: "直男哥", personality: "low_eq" },
+    { id: 'ai3', name: "北京大爷", personality: "bj_dad" }
   ];
 
   const [users, setUsers] = useState([
@@ -108,47 +104,6 @@ const ChatUI = () => {
 
   const handleRemoveUser = (userId: number) => {
     setUsers(users.filter(user => user.id !== userId));
-  };
-
-  const typeWriter = (newContent: string, messageId: number) => {
-    if (!newContent) return;
-    
-    setIsTyping(true);
-    currentMessageRef.current = messageId;
-    
-    // 获取已显示的内容长度作为起始位置
-    const startIndex = accumulatedContentRef.current.length;
-    let currentIndex = startIndex;
-    
-    // 清除之前的打字效果
-    if (typewriterRef.current) {
-      clearInterval(typewriterRef.current);
-    }
-    
-    typewriterRef.current = setInterval(() => {
-      currentIndex++;
-      
-      setMessages(prev => {
-        const newMessages = [...prev];
-        const messageIndex = newMessages.findIndex(msg => msg.id === messageId);
-        if (messageIndex !== -1) {
-          newMessages[messageIndex] = {
-            ...newMessages[messageIndex],
-            content: newContent.slice(0, currentIndex)
-          };
-        }
-        return newMessages;
-      });
-
-      if (currentIndex >= newContent.length) {
-        if (typewriterRef.current) {
-          clearInterval(typewriterRef.current);
-        }
-        setIsTyping(false);
-        currentMessageRef.current = null;
-        accumulatedContentRef.current = newContent; // 更新完整内容
-      }
-    }, typingSpeed);
   };
 
   const scrollToBottom = () => {
@@ -176,7 +131,7 @@ const ChatUI = () => {
     accumulatedContentRef.current = "";
 
     // 构建历史消息数组
-    const messageHistory = messages.map(msg => ({
+    let messageHistory = messages.map(msg => ({
       role: 'system',
       content: msg.sender.name == "我" ? 'user：' + msg.content :  msg.sender.name + '：' + msg.content,
       name: msg.sender.name
@@ -205,6 +160,7 @@ const ChatUI = () => {
             message: inputMessage,
             personality: aiCharacters[i].personality,
             history: messageHistory,
+            index: i,
             aiName: aiCharacters[i].name
           }),
         });
@@ -258,6 +214,12 @@ const ChatUI = () => {
             }
           }
         }
+        // 将当前AI的回复添加到消息历史中，供下一个AI使用
+        messageHistory.push({
+          role: 'system',
+          content: aiMessage.sender.name + '：' + completeResponse,
+          name: aiMessage.sender.name
+        });
 
         // 等待一小段时间再开始下一个 AI 的回复
         if (i < aiCharacters.length - 1) {
