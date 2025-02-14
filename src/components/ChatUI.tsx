@@ -177,8 +177,8 @@ const ChatUI = () => {
 
     // 构建历史消息数组
     const messageHistory = messages.map(msg => ({
-      role: msg.isAI ? 'assistant' : 'user',
-      content: msg.content,
+      role: 'system',
+      content: msg.sender.name == "我" ? 'user：' + msg.content :  msg.sender.name + '：' + msg.content,
       name: msg.sender.name
     }));
 
