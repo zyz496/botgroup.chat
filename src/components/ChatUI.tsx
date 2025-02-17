@@ -18,6 +18,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+import {generateAICharacters} from "@/config/aiCharacters";
+import { groups } from "@/config/groups";
+import type { AICharacter } from "@/config/aiCharacters";
+
 // 使用本地头像数据，避免外部依赖
 const getAvatarData = (name: string) => {
   const colors = ['#1abc9c', '#3498db', '#9b59b6', '#f1c40f', '#e67e22'];
@@ -29,7 +33,15 @@ const getAvatarData = (name: string) => {
 };
 
 // 单个完整头像
-const SingleAvatar = ({ user }: { user: User }) => {
+const SingleAvatar = ({ user }: { user: User | AICharacter }) => {
+  // 如果有头像就使用头像，否则使用默认的文字头像
+  if ('avatar' in user && user.avatar) {
+    return (
+      <div className="w-full h-full">
+        <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
   const avatarData = getAvatarData(user.name);
   return (
     <div 
@@ -75,16 +87,11 @@ const QuarterAvatar = ({ user, index }: { user: User, index: number }) => {
 };
 
 const ChatUI = () => {
-  // 添加 AI 角色定义
-  const aiCharacters = [
-    { id: 'ai1', name: "暖心姐", personality: "high_eq" },
-    { id: 'ai2', name: "直男哥", personality: "low_eq" },
-    { id: 'ai3', name: "北京大爷", personality: "bj_dad" }
-  ];
-
+  const [group, setGroup] = useState(groups[1]);
+  const groupAiCharacters = generateAICharacters(group.name).filter(character => group.members.includes(character.id));
   const [users, setUsers] = useState([
     { id: 1, name: "我" },
-    ...aiCharacters
+    ...groupAiCharacters
   ]);
   const [showMembers, setShowMembers] = useState(false);
   const [messages, setMessages] = useState([
@@ -94,7 +101,6 @@ const ChatUI = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [pendingContent, setPendingContent] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  const typingSpeed = 30;
   const currentMessageRef = useRef<number | null>(null);
   const typewriterRef = useRef<NodeJS.Timeout | null>(null);
   const accumulatedContentRef = useRef(""); // 用于跟踪完整内容
@@ -132,17 +138,17 @@ const ChatUI = () => {
 
     // 构建历史消息数组
     let messageHistory = messages.map(msg => ({
-      role: 'system',
+      role: 'user',
       content: msg.sender.name == "我" ? 'user：' + msg.content :  msg.sender.name + '：' + msg.content,
       name: msg.sender.name
     }));
 
     // 依次请求两个 AI 的回复
-    for (let i = 0; i < aiCharacters.length; i++) {
+    for (let i = 0; i < groupAiCharacters.length; i++) {
       // 创建当前 AI 角色的消息
       const aiMessage = {
         id: messages.length + 2 + i,
-        sender: { id: aiCharacters[i].id, name: aiCharacters[i].name },
+        sender: { id: groupAiCharacters[i].id, name: groupAiCharacters[i].name },
         content: "",
         isAI: true
       };
@@ -157,11 +163,13 @@ const ChatUI = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            model: groupAiCharacters[i].model,
             message: inputMessage,
-            personality: aiCharacters[i].personality,
+            personality: groupAiCharacters[i].personality,
             history: messageHistory,
             index: i,
-            aiName: aiCharacters[i].name
+            aiName: groupAiCharacters[i].name,
+            custom_prompt: groupAiCharacters[i].custom_prompt
           }),
         });
 
@@ -216,13 +224,13 @@ const ChatUI = () => {
         }
         // 将当前AI的回复添加到消息历史中，供下一个AI使用
         messageHistory.push({
-          role: 'system',
+          role: 'user',
           content: aiMessage.sender.name + '：' + completeResponse,
           name: aiMessage.sender.name
         });
 
         // 等待一小段时间再开始下一个 AI 的回复
-        if (i < aiCharacters.length - 1) {
+        if (i < groupAiCharacters.length - 1) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
@@ -295,7 +303,7 @@ const ChatUI = () => {
               <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 rounded-full border-2 border-white"></div>
             </div>
             <div>
-              <h1 className="font-medium text-base">硅碳摸鱼交流群</h1>
+              <h1 className="font-medium text-base">{group.name}</h1>
               <p className="text-xs text-gray-500">{users.length} 名成员</p>
             </div>
           </div>
@@ -339,7 +347,7 @@ const ChatUI = () => {
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full p-4">
           <div className="space-y-4">
-            {messages.map((message) => (
+            {messages.filter(message => message.content?.trim()).map((message) => (
               <div key={message.id} 
                 className={`flex items-start gap-2 ${message.sender.name === "我" ? "justify-end" : ""}`}>
                 {message.sender.name !== "我" && (
@@ -352,7 +360,7 @@ const ChatUI = () => {
                 <div className={message.sender.name === "我" ? "text-right" : ""}>
                   <div className="text-sm text-gray-500">{message.sender.name}</div>
                   <div className={`mt-1 p-3 rounded-lg shadow-sm ${
-                    message.sender.name === "我" ? "bg-blue-500 text-white" : "bg-white"
+                    message.sender.name === "我" ? "bg-blue-500 text-white text-left" : "bg-white"
                   }`}>
                     {message.content}
                     {message.isAI && isTyping && currentMessageRef.current === message.id && (
