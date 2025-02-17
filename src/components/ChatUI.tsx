@@ -191,7 +191,23 @@ const ChatUI = () => {
         while (true) {
           const { done, value } = await reader.read();
           
-          if (done) break;
+          if (done) {
+            //如果completeResponse为空，
+            if (completeResponse.trim() === "") {
+            completeResponse = "这个问题难倒我了，下一位。";
+            setMessages(prev => {
+              const newMessages = [...prev];
+              const aiMessageIndex = newMessages.findIndex(msg => msg.id === aiMessage.id);
+              if (aiMessageIndex !== -1) {
+                newMessages[aiMessageIndex] = {
+                  ...newMessages[aiMessageIndex],
+                  content: completeResponse
+                };
+              }
+              return newMessages;
+            });}
+            break;
+          }
           
           buffer += decoder.decode(value, { stream: true });
           
@@ -216,13 +232,15 @@ const ChatUI = () => {
                     }
                     return newMessages;
                   });
-                }
+                } 
+
               } catch (e) {
                 console.error('解析响应数据失败:', e);
               }
             }
           }
         }
+
         // 将当前AI的回复添加到消息历史中，供下一个AI使用
         messageHistory.push({
           role: 'user',
@@ -348,7 +366,7 @@ const ChatUI = () => {
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full p-4">
           <div className="space-y-4">
-            {messages.filter(message => message.content?.trim()).map((message) => (
+            {messages.map((message) => (
               <div key={message.id} 
                 className={`flex items-start gap-2 ${message.sender.name === "我" ? "justify-end" : ""}`}>
                 {message.sender.name !== "我" && (
@@ -363,9 +381,26 @@ const ChatUI = () => {
                   <div className={`mt-1 p-3 rounded-lg shadow-sm ${
                     message.sender.name === "我" ? "bg-blue-500 text-white text-left" : "bg-white"
                   }`}>
-                    <ReactMarkdown className={`prose dark:prose-invert max-w-none ${
-                      message.sender.name === "我" ? "text-white [&_*]:text-white" : ""
-                    }`}>
+                    <ReactMarkdown 
+                      className={`prose dark:prose-invert max-w-none ${
+                        message.sender.name === "我" ? "text-white [&_*]:text-white" : ""
+                      } 
+                      [&_p]:m-0 
+                      [&_pre]:bg-gray-100 
+                      [&_pre]:p-3 
+                      [&_pre]:rounded-lg
+                      [&_code]:text-sm
+                      [&_a]:text-blue-500
+                      [&_a]:no-underline
+                      [&_ul]:my-2
+                      [&_ol]:my-2
+                      [&_li]:my-1
+                      [&_blockquote]:border-l-4
+                      [&_blockquote]:border-gray-300
+                      [&_blockquote]:pl-4
+                      [&_blockquote]:my-2
+                      [&_blockquote]:italic`}
+                    >
                       {message.content}
                     </ReactMarkdown>
                     {message.isAI && isTyping && currentMessageRef.current === message.id && (
@@ -437,7 +472,7 @@ const ChatUI = () => {
                       </Avatar>
                       <span>{user.name}</span>
                     </div>
-                    {user.name !== "我" && (
+                    {/*user.name !== "我" && (
                       <Button 
                         variant="ghost" 
                         size="icon"
@@ -445,7 +480,7 @@ const ChatUI = () => {
                       >
                         <UserMinus className="w-4 h-4 text-red-500" />
                       </Button>
-                    )}
+                    )*/}
                   </div>
                 ))}
               </div>
