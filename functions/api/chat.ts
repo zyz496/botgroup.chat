@@ -2,16 +2,36 @@ import OpenAI from 'openai';
 
 export async function onRequestPost({ env, request }) {
   try {
-    const { message, personality, history, aiName, index } = await request.json();
-    const apiKey = env.DASHSCOPE_API_KEY;
+    const { message, personality, history, aiName, index, model = "qwen-plus" } = await request.json();
+    
+    // 配置不同模型的设置
+    const modelConfigs = {
+      "qwen-plus": {
+        apiKey: env.DASHSCOPE_API_KEY,
+        baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+      },
+      "hunyuan-turbo": {
+        apiKey: env.HUNYUAN_API_KEY,
+        baseURL: "https://api.hunyuan.cloud.tencent.com/v1"
+      },
+      "gpt-4": {
+        apiKey: env.OPENAI_API_KEY,
+        baseURL: "https://api.openai.com/v1"
+      }
+    };
 
-    if (!apiKey) {
-      throw new Error('API密钥未配置');
+    const modelConfig = modelConfigs[model];
+    if (!modelConfig) {
+      throw new Error('不支持的模型类型');
+    }
+
+    if (!modelConfig.apiKey) {
+      throw new Error(`${model} 的API密钥未配置`);
     }
 
     const openai = new OpenAI({
-      apiKey: apiKey,
-      baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+      apiKey: modelConfig.apiKey,
+      baseURL: modelConfig.baseURL
     });
 
     // 根据性格设置不同的系统提示语
@@ -68,7 +88,7 @@ export async function onRequestPost({ env, request }) {
 
     // 使用流式响应
     const stream = await openai.chat.completions.create({
-      model: "qwen-plus",
+      model: model,
       messages: messages,
       stream: true,
     });
