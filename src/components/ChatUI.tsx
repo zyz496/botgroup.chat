@@ -21,6 +21,7 @@ import {
 import {generateAICharacters} from "@/config/aiCharacters";
 import { groups } from "@/config/groups";
 import type { AICharacter } from "@/config/aiCharacters";
+import ReactMarkdown from 'react-markdown';
 
 // 使用本地头像数据，避免外部依赖
 const getAvatarData = (name: string) => {
@@ -362,7 +363,11 @@ const ChatUI = () => {
                   <div className={`mt-1 p-3 rounded-lg shadow-sm ${
                     message.sender.name === "我" ? "bg-blue-500 text-white text-left" : "bg-white"
                   }`}>
-                    {message.content}
+                    <ReactMarkdown className={`prose dark:prose-invert max-w-none ${
+                      message.sender.name === "我" ? "text-white [&_*]:text-white" : ""
+                    }`}>
+                      {message.content}
+                    </ReactMarkdown>
                     {message.isAI && isTyping && currentMessageRef.current === message.id && (
                       <span className="typing-indicator ml-1">▋</span>
                     )}

@@ -20,11 +20,13 @@
     "openai": "^4.83.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.3",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@shadcn/ui": "^0.0.4",
+    "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^22.13.1",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
