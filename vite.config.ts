@@ -27,6 +27,17 @@ export default defineConfig({
     target: 'esnext',
     minify: 'esbuild',
     assetsDir: 'assets', // 静态资源目录
-    outDir: 'dist'
+    outDir: 'dist',
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+      output: {
+        assetFileNames: (assetInfo) => {
+          // 将资源文件输出到 dist/assets 目录
+          return `assets/[name].[hash][extname]`
+        }
+      }
+    }
   }
 })
