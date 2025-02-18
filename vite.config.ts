@@ -1,9 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import copy from 'vite-plugin-copy'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    copy({
+      patterns: [
+        {
+          from: 'assets',  // 源目录
+          to: 'dist/assets'  // 目标目录
+        }
+      ]
+    })
+  ],
   base: '/',
   server: {
     port: 3000,
@@ -33,10 +44,9 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html'),
       },
       output: {
-        assetFileNames: (assetInfo) => {
-          // 将资源文件输出到 dist/assets 目录
-          return `assets/[name].[hash][extname]`
-        }
+        assetFileNames: 'assets/[name].[hash][extname]',
+        chunkFileNames: 'assets/[name].[hash].js',
+        entryFileNames: 'assets/[name].[hash].js'
       }
     }
   }

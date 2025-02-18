@@ -23,7 +23,8 @@
     "react-markdown": "^9.0.3",
     "tailwind-merge": "^2.6.0",
     "tailwind-scrollbar-hide": "^2.0.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "vite-plugin-copy": "^0.1.6"
   },
   "devDependencies": {
     "@shadcn/ui": "^0.0.4",
