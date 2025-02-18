@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Menu, MoreHorizontal, UserPlus, UserMinus, Users2, Users, MoreVertical, MessageCircle } from 'lucide-react';
+import { Send, Menu, MoreHorizontal, UserPlus, UserMinus, Users2, Users, MoreVertical, Mic, MicOff } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -56,6 +56,18 @@ const SingleAvatar = ({ user }: { user: User | AICharacter }) => {
 
 // 左右分半头像
 const HalfAvatar = ({ user, isFirst }: { user: User, isFirst: boolean }) => {
+  if ('avatar' in user && user.avatar) {
+    return (
+      <div 
+        className="w-1/2 h-full"
+        style={{ 
+          borderRight: isFirst ? '1px solid white' : 'none'
+        }}
+      >
+        <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
   const avatarData = getAvatarData(user.name);
   return (
     <div 
@@ -72,6 +84,19 @@ const HalfAvatar = ({ user, isFirst }: { user: User, isFirst: boolean }) => {
 
 // 四分之一头像
 const QuarterAvatar = ({ user, index }: { user: User, index: number }) => {
+  if ('avatar' in user && user.avatar) {
+    return (
+      <div 
+        className="aspect-square"
+        style={{ 
+          borderRight: index % 2 === 0 ? '1px solid white' : 'none',
+          borderBottom: index < 2 ? '1px solid white' : 'none'
+        }}
+      >
+        <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+      </div>
+    );
+  }
   const avatarData = getAvatarData(user.name);
   return (
     <div 
@@ -107,6 +132,9 @@ const ChatUI = () => {
   const accumulatedContentRef = useRef(""); // 用于跟踪完整内容
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // 添加禁言状态
+  const [mutedUsers, setMutedUsers] = useState<string[]>([]);
+
   const abortController = new AbortController();
 
   const handleRemoveUser = (userId: number) => {
@@ -120,6 +148,15 @@ const ChatUI = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // 添加禁言/取消禁言处理函数
+  const handleToggleMute = (userId: string) => {
+    setMutedUsers(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
@@ -144,12 +181,15 @@ const ChatUI = () => {
       name: msg.sender.name
     }));
 
-    // 依次请求两个 AI 的回复
     for (let i = 0; i < groupAiCharacters.length; i++) {
+      //禁言
+      if (mutedUsers.includes(groupAiCharacters[i].id)) {
+        continue;
+      }
       // 创建当前 AI 角色的消息
       const aiMessage = {
         id: messages.length + 2 + i,
-        sender: { id: groupAiCharacters[i].id, name: groupAiCharacters[i].name },
+        sender: { id: groupAiCharacters[i].id, name: groupAiCharacters[i].name, avatar: groupAiCharacters[i].avatar },
         content: "",
         isAI: true
       };
@@ -287,19 +327,16 @@ const ChatUI = () => {
           {/* 左侧群组信息 */}
           <div className="flex items-center gap-1.5">
             <div className="relative w-10 h-10">
-              <div className="w-full h-full rounded-full border-2 border-white overflow-hidden bg-white">
+              <div className="w-full h-full overflow-hidden bg-white border border-gray-200">
                 {users.length === 1 ? (
-                  // 单个成员时显示一个大头像
                   <SingleAvatar user={users[0]} />
                 ) : users.length === 2 ? (
-                  // 两个成员时左右分布
                   <div className="h-full flex">
                     {users.slice(0, 2).map((user, index) => (
                       <HalfAvatar key={user.id} user={user} isFirst={index === 0} />
                     ))}
                   </div>
                 ) : users.length === 3 ? (
-                  // 三个成员时上2下1
                   <div className="h-full flex flex-col">
                     <div className="flex h-1/2">
                       {users.slice(0, 2).map((user, index) => (
@@ -311,7 +348,6 @@ const ChatUI = () => {
                     </div>
                   </div>
                 ) : (
-                  // 四个或更多成员时显示2x2网格
                   <div className="h-full grid grid-cols-2">
                     {users.slice(0, 4).map((user, index) => (
                       <QuarterAvatar key={user.id} user={user} index={index} />
@@ -319,7 +355,7 @@ const ChatUI = () => {
                   </div>
                 )}
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 rounded-full border-2 border-white"></div>
+              <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 border-2 border-white"></div>
             </div>
             <div>
               <h1 className="font-medium text-base">{group.name}</h1>
@@ -337,9 +373,13 @@ const ChatUI = () => {
                     <Tooltip>
                       <TooltipTrigger>
                         <Avatar className="w-7 h-7 border-2 border-white">
-                          <AvatarFallback style={{ backgroundColor: avatarData.backgroundColor, color: 'white' }}>
-                            {avatarData.text}
-                          </AvatarFallback>
+                          {'avatar' in user && user.avatar ? (
+                            <AvatarImage src={user.avatar} />
+                          ) : (
+                            <AvatarFallback style={{ backgroundColor: avatarData.backgroundColor, color: 'white' }}>
+                              {avatarData.text}
+                            </AvatarFallback>
+                          )}
                         </Avatar>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -371,9 +411,13 @@ const ChatUI = () => {
                 className={`flex items-start gap-2 ${message.sender.name === "我" ? "justify-end" : ""}`}>
                 {message.sender.name !== "我" && (
                   <Avatar>
+                    {'avatar' in message.sender && message.sender.avatar ? (
+                      <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
+                    ) : (
                     <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
                       {message.sender.name[0]}
                     </AvatarFallback>
+                    )}
                   </Avatar>
                 )}
                 <div className={message.sender.name === "我" ? "text-right" : ""}>
@@ -385,6 +429,8 @@ const ChatUI = () => {
                       className={`prose dark:prose-invert max-w-none ${
                         message.sender.name === "我" ? "text-white [&_*]:text-white" : ""
                       } 
+                      [&_h3]:py-1.5
+                      [&_h3]:m-0
                       [&_p]:m-0 
                       [&_pre]:bg-gray-900 
                       [&_pre]:p-2
@@ -419,9 +465,13 @@ const ChatUI = () => {
                 </div>
                 {message.sender.name === "我" && (
                   <Avatar>
+                   {'avatar' in message.sender && message.sender.avatar ? (
+                      <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
+                    ) : (
                     <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
                       {message.sender.name[0]}
                     </AvatarFallback>
+                    )}
                   </Avatar>
                 )}
               </div>
@@ -475,21 +525,52 @@ const ChatUI = () => {
                   <div key={user.id} className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg">
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarFallback style={{ backgroundColor: getAvatarData(user.name).backgroundColor, color: 'white' }}>
-                          {user.name[0]}
-                        </AvatarFallback>
+                        {'avatar' in user && user.avatar ? (
+                          <AvatarImage src={user.avatar} className="w-10 h-10" /> 
+                        ) : (
+                          <AvatarFallback style={{ backgroundColor: getAvatarData(user.name).backgroundColor, color: 'white' }}>
+                            {user.name[0]}
+                          </AvatarFallback>
+                        )}
                       </Avatar>
-                      <span>{user.name}</span>
+                      <div className="flex flex-col">
+                        <span>{user.name}</span>
+                        {mutedUsers.includes(user.id) && (
+                          <span className="text-xs text-red-500">已禁言</span>
+                        )}
+                      </div>
                     </div>
-                    {/*user.name !== "我" && (
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleRemoveUser(user.id)}
-                      >
-                        <UserMinus className="w-4 h-4 text-red-500" />
-                      </Button>
-                    )*/}
+                    {user.name !== "我" && (
+                      <div className="flex gap-2">
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon"
+                                onClick={() => handleToggleMute(user.id)}
+                              >
+                                {mutedUsers.includes(user.id) ? (
+                                  <MicOff className="w-4 h-4 text-red-500" />
+                                ) : (
+                                  <Mic className="w-4 h-4 text-green-500" />
+                                )}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {mutedUsers.includes(user.id) ? '取消禁言' : '禁言'}
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                        {/*<Button 
+                          variant="ghost" 
+                          size="icon"
+                          onClick={() => handleRemoveUser(user.id)}
+                        >
+                          <UserMinus className="w-4 h-4 text-red-500" />
+                        </Button>*/}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

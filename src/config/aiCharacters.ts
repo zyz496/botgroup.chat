@@ -64,7 +64,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       name: "豆包", 
       personality: "doubao",
       model: "ep-20250217191935-wzj8l",
-      avatar: "https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/samantha/logo-icon-white-bg.png",
+      avatar: "/assets/doubao_new.png",
       custom_prompt: `你是一个名叫"豆包"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     },
     { 
