@@ -9,8 +9,8 @@ export default defineConfig({
     copy({
       targets: [
         {
-          src: 'assets',  // 源目录
-          dest: 'dist'    // 目标目录
+          src: 'img',  // 源目录
+          dest: 'dist/img'    // 目标目录
         }
       ]
     })
@@ -37,17 +37,6 @@ export default defineConfig({
   build: {
     target: 'esnext',
     minify: 'esbuild',
-    assetsDir: 'assets', // 静态资源目录
-    outDir: 'dist',
-    rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html'),
-      },
-      output: {
-        assetFileNames: 'assets/[name].[hash][extname]',
-        chunkFileNames: 'assets/[name].[hash].js',
-        entryFileNames: 'assets/[name].[hash].js'
-      }
-    }
+    outDir: 'dist'
   }
 })

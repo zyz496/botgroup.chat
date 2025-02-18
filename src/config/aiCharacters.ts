@@ -64,7 +64,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       name: "豆包", 
       personality: "doubao",
       model: "ep-20250217191935-wzj8l",
-      avatar: "/assets/doubao_new.png",
+      avatar: "/img/doubao_new.png",
       custom_prompt: `你是一个名叫"豆包"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     },
     { 
@@ -80,7 +80,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       name: "DeepSeek", 
       personality: "deepseek-v3",
       model: "deepseek-v3",
-      avatar: "/assets/ds.svg",
+      avatar: "/img/ds.svg",
       custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     }
   ];
