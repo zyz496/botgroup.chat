@@ -386,10 +386,19 @@ const ChatUI = () => {
                         message.sender.name === "我" ? "text-white [&_*]:text-white" : ""
                       } 
                       [&_p]:m-0 
-                      [&_pre]:bg-gray-100 
-                      [&_pre]:p-3 
+                      [&_pre]:bg-gray-900 
+                      [&_pre]:p-2
+                      [&_pre]:m-0 
                       [&_pre]:rounded-lg
+                      [&_pre]:text-gray-100
+                      [&_pre]:whitespace-pre-wrap
+                      [&_pre]:break-words
+                      [&_pre_code]:whitespace-pre-wrap
+                      [&_pre_code]:break-words
                       [&_code]:text-sm
+                      [&_code]:text-gray-400
+                      [&_code:not(:where([class~="language-"]))]:text-pink-500
+                      [&_code:not(:where([class~="language-"]))]:bg-transparent
                       [&_a]:text-blue-500
                       [&_a]:no-underline
                       [&_ul]:my-2
