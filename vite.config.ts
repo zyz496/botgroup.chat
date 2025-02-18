@@ -1,19 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import copy from 'rollup-plugin-copy'
 
 export default defineConfig({
   plugins: [
-    react(),
-    copy({
-      targets: [
-        {
-          src: 'img',  // 源目录
-          dest: 'dist/img'    // 目标目录
-        }
-      ]
-    })
+    react()
   ],
   base: '/',
   server: {
