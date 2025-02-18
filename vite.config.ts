@@ -26,6 +26,7 @@ export default defineConfig({
   build: {
     target: 'esnext',
     minify: 'esbuild',
+    assetsDir: 'assets', // 静态资源目录
     outDir: 'dist'
   }
 })
