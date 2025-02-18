@@ -23,8 +23,7 @@
     "react-markdown": "^9.0.3",
     "tailwind-merge": "^2.6.0",
     "tailwind-scrollbar-hide": "^2.0.0",
-    "tailwindcss-animate": "^1.0.7",
-    "vite-plugin-copy": "^0.1.6"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@shadcn/ui": "^0.0.4",
@@ -35,6 +34,7 @@
     "@vitejs/plugin-react": "^4.2.0",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.2",
+    "rollup-plugin-copy": "^3.5.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.0.2",
     "vite": "^5.0.0"

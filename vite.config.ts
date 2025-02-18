@@ -1,16 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import copy from 'vite-plugin-copy'
+import copy from 'rollup-plugin-copy'
 
 export default defineConfig({
   plugins: [
     react(),
     copy({
-      patterns: [
+      targets: [
         {
-          from: 'assets',  // 源目录
-          to: 'dist/assets'  // 目标目录
+          src: 'assets',  // 源目录
+          dest: 'dist'    // 目标目录
         }
       ]
     })
