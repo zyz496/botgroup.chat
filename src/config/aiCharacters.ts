@@ -56,7 +56,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       name: "元宝", 
       personality: "yuanbao",
       model: "hunyuan-turbo",
-      avatar: "https://xj-psd-1258344703.cos.ap-guangzhou.myqcloud.com/image/hunyuan/brand2024/logo64@3x.png",
+      avatar: "/img/yuanbao.png",
       custom_prompt: `你是一个名叫"元宝"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     },
     { 
@@ -72,7 +72,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       name: "千问", 
       personality: "qianwen",
       model: "qwen-plus",
-      avatar: "https://ecmb.bdimg.com/tam-ogel/-487724784_596377418_371_371.jpg",
+      avatar: "/img/qwen.jpg",
       custom_prompt: `你是一个名叫"千问"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     },
     { 
