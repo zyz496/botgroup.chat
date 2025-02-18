@@ -74,6 +74,14 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: "qwen-plus",
       avatar: "https://ecmb.bdimg.com/tam-ogel/-487724784_596377418_371_371.jpg",
       custom_prompt: `你是一个名叫"千问"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
+    },
+    { 
+      id: 'ai7', 
+      name: "DeepSeek", 
+      personality: "deepseek-v3",
+      model: "deepseek-v3",
+      avatar: "/assets/ds.svg",
+      custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     }
   ];
 }

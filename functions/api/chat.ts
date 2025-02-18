@@ -10,6 +10,10 @@ export async function onRequestPost({ env, request }) {
         apiKey: env.DASHSCOPE_API_KEY,
         baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
       },
+      "deepseek-v3": {
+        apiKey: env.DASHSCOPE_API_KEY,
+        baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+      },
       "hunyuan-turbo": {
         apiKey: env.HUNYUAN_API_KEY,
         baseURL: "https://api.hunyuan.cloud.tencent.com/v1"
