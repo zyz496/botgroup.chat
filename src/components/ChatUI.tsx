@@ -22,6 +22,9 @@ import {generateAICharacters} from "@/config/aiCharacters";
 import { groups } from "@/config/groups";
 import type { AICharacter } from "@/config/aiCharacters";
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
 
 // 使用本地头像数据，避免外部依赖
 const getAvatarData = (name: string) => {
@@ -111,6 +114,33 @@ const QuarterAvatar = ({ user, index }: { user: User, index: number }) => {
     </div>
   );
 };
+
+// 动态导入 KaTeX 样式
+const KaTeXStyle = () => (
+  <style jsx global>{`
+    /* 只在聊天消息内应用 KaTeX 样式 */
+    .chat-message .katex-html {
+      display: none;
+    }
+    
+    .chat-message .katex {
+      font: normal 1.1em KaTeX_Main, Times New Roman, serif;
+      line-height: 1.2;
+      text-indent: 0;
+      white-space: nowrap;
+      text-rendering: auto;
+    }
+    
+    .chat-message .katex-display {
+      display: block;
+      margin: 1em 0;
+      text-align: center;
+    }
+    
+    /* 其他必要的 KaTeX 样式 */
+    @import "katex/dist/katex.min.css";
+  `}</style>
+);
 
 const ChatUI = () => {
   const [group, setGroup] = useState(groups[1]);
@@ -320,265 +350,272 @@ const ChatUI = () => {
   }, []);
 
   return (
-    <div className="h-[100dvh] flex flex-col bg-gray-100 fixed inset-0 overflow-hidden">
-      {/* Header */}
-      <header className="bg-white shadow flex-none">
-        <div className="flex items-center justify-between px-4 py-3">
-          {/* 左侧群组信息 */}
-          <div className="flex items-center gap-1.5">
-            <div className="relative w-10 h-10">
-              <div className="w-full h-full overflow-hidden bg-white border border-gray-200">
-                {users.length === 1 ? (
-                  <SingleAvatar user={users[0]} />
-                ) : users.length === 2 ? (
-                  <div className="h-full flex">
-                    {users.slice(0, 2).map((user, index) => (
-                      <HalfAvatar key={user.id} user={user} isFirst={index === 0} />
-                    ))}
-                  </div>
-                ) : users.length === 3 ? (
-                  <div className="h-full flex flex-col">
-                    <div className="flex h-1/2">
+    <>
+      <KaTeXStyle />
+      <div className="h-[100dvh] flex flex-col bg-gray-100 fixed inset-0 overflow-hidden">
+        {/* Header */}
+        <header className="bg-white shadow flex-none">
+          <div className="flex items-center justify-between px-4 py-3">
+            {/* 左侧群组信息 */}
+            <div className="flex items-center gap-1.5">
+              <div className="relative w-10 h-10">
+                <div className="w-full h-full overflow-hidden bg-white border border-gray-200">
+                  {users.length === 1 ? (
+                    <SingleAvatar user={users[0]} />
+                  ) : users.length === 2 ? (
+                    <div className="h-full flex">
                       {users.slice(0, 2).map((user, index) => (
                         <HalfAvatar key={user.id} user={user} isFirst={index === 0} />
                       ))}
                     </div>
-                    <div className="h-1/2 flex justify-center">
-                      <SingleAvatar user={users[2]} />
+                  ) : users.length === 3 ? (
+                    <div className="h-full flex flex-col">
+                      <div className="flex h-1/2">
+                        {users.slice(0, 2).map((user, index) => (
+                          <HalfAvatar key={user.id} user={user} isFirst={index === 0} />
+                        ))}
+                      </div>
+                      <div className="h-1/2 flex justify-center">
+                        <SingleAvatar user={users[2]} />
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <div className="h-full grid grid-cols-2">
-                    {users.slice(0, 4).map((user, index) => (
-                      <QuarterAvatar key={user.id} user={user} index={index} />
-                    ))}
+                  ) : (
+                    <div className="h-full grid grid-cols-2">
+                      {users.slice(0, 4).map((user, index) => (
+                        <QuarterAvatar key={user.id} user={user} index={index} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 border-2 border-white"></div>
+              </div>
+              <div>
+                <h1 className="font-medium text-base">{group.name}</h1>
+                <p className="text-xs text-gray-500">{users.length} 名成员</p>
+              </div>
+            </div>
+            
+            {/* 右侧头像组和按钮 */}
+            <div className="flex items-center">
+              <div className="flex -space-x-2 ">
+                {users.slice(0, 4).map((user) => {
+                  const avatarData = getAvatarData(user.name);
+                  return (
+                    <TooltipProvider key={user.id}>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Avatar className="w-7 h-7 border-2 border-white">
+                            {'avatar' in user && user.avatar ? (
+                              <AvatarImage src={user.avatar} />
+                            ) : (
+                              <AvatarFallback style={{ backgroundColor: avatarData.backgroundColor, color: 'white' }}>
+                                {avatarData.text}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{user.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  );
+                })}
+                {users.length > 4 && (
+                  <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs border-2 border-white">
+                    +{users.length - 4}
                   </div>
                 )}
               </div>
-              <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 border-2 border-white"></div>
-            </div>
-            <div>
-              <h1 className="font-medium text-base">{group.name}</h1>
-              <p className="text-xs text-gray-500">{users.length} 名成员</p>
+              <Button variant="ghost" size="icon" onClick={() => setShowMembers(true)}>
+                <Users className="w-5 h-5" />
+              </Button>
             </div>
           </div>
-          
-          {/* 右侧头像组和按钮 */}
-          <div className="flex items-center">
-            <div className="flex -space-x-2 ">
-              {users.slice(0, 4).map((user) => {
-                const avatarData = getAvatarData(user.name);
-                return (
-                  <TooltipProvider key={user.id}>
-                    <Tooltip>
-                      <TooltipTrigger>
-                        <Avatar className="w-7 h-7 border-2 border-white">
-                          {'avatar' in user && user.avatar ? (
-                            <AvatarImage src={user.avatar} />
-                          ) : (
-                            <AvatarFallback style={{ backgroundColor: avatarData.backgroundColor, color: 'white' }}>
-                              {avatarData.text}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{user.name}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                );
-              })}
-              {users.length > 4 && (
-                <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs border-2 border-white">
-                  +{users.length - 4}
+        </header>
+
+        {/* Main Chat Area */}
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-full p-4">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div key={message.id} 
+                  className={`flex items-start gap-2 ${message.sender.name === "我" ? "justify-end" : ""}`}>
+                  {message.sender.name !== "我" && (
+                    <Avatar>
+                      {'avatar' in message.sender && message.sender.avatar ? (
+                        <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
+                      ) : (
+                      <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
+                        {message.sender.name[0]}
+                      </AvatarFallback>
+                      )}
+                    </Avatar>
+                  )}
+                  <div className={message.sender.name === "我" ? "text-right" : ""}>
+                    <div className="text-sm text-gray-500">{message.sender.name}</div>
+                    <div className={`mt-1 p-3 rounded-lg shadow-sm chat-message ${
+                      message.sender.name === "我" ? "bg-blue-500 text-white text-left" : "bg-white"
+                    }`}>
+                      <ReactMarkdown 
+                        remarkPlugins={[remarkGfm, remarkMath]}
+                        rehypePlugins={[rehypeKatex]}
+                        className={`prose dark:prose-invert max-w-none ${
+                          message.sender.name === "我" ? "text-white [&_*]:text-white" : ""
+                        }
+                        [&_h2]:py-1
+                        [&_h2]:m-0
+                        [&_h3]:py-1.5
+                        [&_h3]:m-0
+                        [&_p]:m-0 
+                        [&_pre]:bg-gray-900 
+                        [&_pre]:p-2
+                        [&_pre]:m-0 
+                        [&_pre]:rounded-lg
+                        [&_pre]:text-gray-100
+                        [&_pre]:whitespace-pre-wrap
+                        [&_pre]:break-words
+                        [&_pre_code]:whitespace-pre-wrap
+                        [&_pre_code]:break-words
+                        [&_code]:text-sm
+                        [&_code]:text-gray-400
+                        [&_code:not(:where([class~="language-"]))]:text-pink-500
+                        [&_code:not(:where([class~="language-"]))]:bg-transparent
+                        [&_a]:text-blue-500
+                        [&_a]:no-underline
+                        [&_ul]:my-2
+                        [&_ol]:my-2
+                        [&_li]:my-1
+                        [&_blockquote]:border-l-4
+                        [&_blockquote]:border-gray-300
+                        [&_blockquote]:pl-4
+                        [&_blockquote]:my-2
+                        [&_blockquote]:italic`}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                      {message.isAI && isTyping && currentMessageRef.current === message.id && (
+                        <span className="typing-indicator ml-1">▋</span>
+                      )}
+                    </div>
+                  </div>
+                  {message.sender.name === "我" && (
+                    <Avatar>
+                     {'avatar' in message.sender && message.sender.avatar ? (
+                        <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
+                      ) : (
+                      <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
+                        {message.sender.name[0]}
+                      </AvatarFallback>
+                      )}
+                    </Avatar>
+                  )}
                 </div>
-              )}
+              ))}
+              <div ref={messagesEndRef} />
             </div>
-            <Button variant="ghost" size="icon" onClick={() => setShowMembers(true)}>
-              <Users className="w-5 h-5" />
+          </ScrollArea>
+        </div>
+
+        {/* Input Area */}
+        <div className="bg-white border-t pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 px-4">
+          <div className="flex gap-2">
+            <Input 
+              placeholder="输入消息..." 
+              className="flex-1"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+            />
+            <Button 
+              onClick={handleSendMessage}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              ) : (
+                <Send className="w-4 h-4 mr-2" />
+              )}
+              发送
             </Button>
           </div>
         </div>
-      </header>
 
-      {/* Main Chat Area */}
-      <div className="flex-1 overflow-hidden">
-        <ScrollArea className="h-full p-4">
-          <div className="space-y-4">
-            {messages.map((message) => (
-              <div key={message.id} 
-                className={`flex items-start gap-2 ${message.sender.name === "我" ? "justify-end" : ""}`}>
-                {message.sender.name !== "我" && (
-                  <Avatar>
-                    {'avatar' in message.sender && message.sender.avatar ? (
-                      <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
-                    ) : (
-                    <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
-                      {message.sender.name[0]}
-                    </AvatarFallback>
-                    )}
-                  </Avatar>
-                )}
-                <div className={message.sender.name === "我" ? "text-right" : ""}>
-                  <div className="text-sm text-gray-500">{message.sender.name}</div>
-                  <div className={`mt-1 p-3 rounded-lg shadow-sm ${
-                    message.sender.name === "我" ? "bg-blue-500 text-white text-left" : "bg-white"
-                  }`}>
-                    <ReactMarkdown 
-                      className={`prose dark:prose-invert max-w-none ${
-                        message.sender.name === "我" ? "text-white [&_*]:text-white" : ""
-                      } 
-                      [&_h3]:py-1.5
-                      [&_h3]:m-0
-                      [&_p]:m-0 
-                      [&_pre]:bg-gray-900 
-                      [&_pre]:p-2
-                      [&_pre]:m-0 
-                      [&_pre]:rounded-lg
-                      [&_pre]:text-gray-100
-                      [&_pre]:whitespace-pre-wrap
-                      [&_pre]:break-words
-                      [&_pre_code]:whitespace-pre-wrap
-                      [&_pre_code]:break-words
-                      [&_code]:text-sm
-                      [&_code]:text-gray-400
-                      [&_code:not(:where([class~="language-"]))]:text-pink-500
-                      [&_code:not(:where([class~="language-"]))]:bg-transparent
-                      [&_a]:text-blue-500
-                      [&_a]:no-underline
-                      [&_ul]:my-2
-                      [&_ol]:my-2
-                      [&_li]:my-1
-                      [&_blockquote]:border-l-4
-                      [&_blockquote]:border-gray-300
-                      [&_blockquote]:pl-4
-                      [&_blockquote]:my-2
-                      [&_blockquote]:italic`}
-                    >
-                      {message.content}
-                    </ReactMarkdown>
-                    {message.isAI && isTyping && currentMessageRef.current === message.id && (
-                      <span className="typing-indicator ml-1">▋</span>
-                    )}
-                  </div>
-                </div>
-                {message.sender.name === "我" && (
-                  <Avatar>
-                   {'avatar' in message.sender && message.sender.avatar ? (
-                      <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
-                    ) : (
-                    <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
-                      {message.sender.name[0]}
-                    </AvatarFallback>
-                    )}
-                  </Avatar>
-                )}
+        {/* Members Management Dialog */}
+        <Dialog open={showMembers} onOpenChange={setShowMembers}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>群成员管理</DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <div className="flex justify-between items-center mb-4">
+                <span className="text-sm text-gray-500">当前成员（{users.length}）</span>
+                <Button variant="outline" size="sm">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  添加成员
+                </Button>
               </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
-        </ScrollArea>
-      </div>
-
-      {/* Input Area */}
-      <div className="bg-white border-t pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 px-4">
-        <div className="flex gap-2">
-          <Input 
-            placeholder="输入消息..." 
-            className="flex-1"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-          />
-          <Button 
-            onClick={handleSendMessage}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            ) : (
-              <Send className="w-4 h-4 mr-2" />
-            )}
-            发送
-          </Button>
-        </div>
-      </div>
-
-      {/* Members Management Dialog */}
-      <Dialog open={showMembers} onOpenChange={setShowMembers}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>群成员管理</DialogTitle>
-          </DialogHeader>
-          <div className="mt-4">
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-sm text-gray-500">当前成员（{users.length}）</span>
-              <Button variant="outline" size="sm">
-                <UserPlus className="w-4 h-4 mr-2" />
-                添加成员
-              </Button>
-            </div>
-            <ScrollArea className="h-[300px]">
-              <div className="space-y-2">
-                {users.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        {'avatar' in user && user.avatar ? (
-                          <AvatarImage src={user.avatar} className="w-10 h-10" /> 
-                        ) : (
-                          <AvatarFallback style={{ backgroundColor: getAvatarData(user.name).backgroundColor, color: 'white' }}>
-                            {user.name[0]}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div className="flex flex-col">
-                        <span>{user.name}</span>
-                        {mutedUsers.includes(user.id) && (
-                          <span className="text-xs text-red-500">已禁言</span>
-                        )}
+              <ScrollArea className="h-[300px]">
+                <div className="space-y-2">
+                  {users.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar>
+                          {'avatar' in user && user.avatar ? (
+                            <AvatarImage src={user.avatar} className="w-10 h-10" /> 
+                          ) : (
+                            <AvatarFallback style={{ backgroundColor: getAvatarData(user.name).backgroundColor, color: 'white' }}>
+                              {user.name[0]}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <div className="flex flex-col">
+                          <span>{user.name}</span>
+                          {mutedUsers.includes(user.id) && (
+                            <span className="text-xs text-red-500">已禁言</span>
+                          )}
+                        </div>
                       </div>
+                      {user.name !== "我" && (
+                        <div className="flex gap-2">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon"
+                                  onClick={() => handleToggleMute(user.id)}
+                                >
+                                  {mutedUsers.includes(user.id) ? (
+                                    <MicOff className="w-4 h-4 text-red-500" />
+                                  ) : (
+                                    <Mic className="w-4 h-4 text-green-500" />
+                                  )}
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {mutedUsers.includes(user.id) ? '取消禁言' : '禁言'}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                          {/*<Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => handleRemoveUser(user.id)}
+                          >
+                            <UserMinus className="w-4 h-4 text-red-500" />
+                          </Button>*/}
+                        </div>
+                      )}
                     </div>
-                    {user.name !== "我" && (
-                      <div className="flex gap-2">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="icon"
-                                onClick={() => handleToggleMute(user.id)}
-                              >
-                                {mutedUsers.includes(user.id) ? (
-                                  <MicOff className="w-4 h-4 text-red-500" />
-                                ) : (
-                                  <Mic className="w-4 h-4 text-green-500" />
-                                )}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {mutedUsers.includes(user.id) ? '取消禁言' : '禁言'}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        {/*<Button 
-                          variant="ghost" 
-                          size="icon"
-                          onClick={() => handleRemoveUser(user.id)}
-                        >
-                          <UserMinus className="w-4 h-4 text-red-500" />
-                        </Button>*/}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </>
   );
 };
 

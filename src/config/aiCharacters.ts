@@ -1,8 +1,33 @@
+// 首先定义模型配置
+export const modelConfigs = [
+  {
+    model: "qwen-plus",
+    apiKey: "DASHSCOPE_API_KEY", // 这里存储环境变量的 key 名称
+    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  {
+    model: "deepseek-v3",
+    apiKey: "DASHSCOPE_API_KEY",
+    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
+  {
+    model: "hunyuan-standard",
+    apiKey: "HUNYUAN_API_KEY",
+    baseURL: "https://api.hunyuan.cloud.tencent.com/v1"
+  },
+  {
+    model: "ep-20250217191935-wzj8l",//火山引擎接入点（改成自己的）
+    apiKey: "ARK_API_KEY",
+    baseURL: "https://ark.cn-beijing.volces.com/api/v3"
+  }
+] as const;
+export type ModelType = typeof modelConfigs[number]["model"];
+
 export interface AICharacter {
   id: string;
   name: string;
   personality: string;
-  model: string;
+  model: ModelType;
   avatar?: string;  // 可选的头像 URL
   custom_prompt?: string; // 可选的个性提示
 }
@@ -14,7 +39,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       id: 'ai1', 
       name: "暖心姐", 
       personality: "high_eq",
-      model: "hunyuan-turbo",
+      model: modelConfigs[2].model,
       avatar: "",  // 如果有头像资源可以添加路径,
       custom_prompt: `你是一个名叫"暖心姐"的硅基生命体，你当前在一个叫"${groupName}" 的群里，性格温暖体贴，情商很高。
 回复时要：
@@ -29,7 +54,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       id: 'ai2', 
       name: "直男哥", 
       personality: "low_eq",
-      model: "hunyuan-turbo",
+      model: modelConfigs[2].model,
       avatar: "",
       custom_prompt: `你是一个名叫"直男哥"的硅基生命体，你当前在一个叫"${groupName}" 的群里，是一个极度直男，负责在群里制造快乐。你说话极其直接，完全没有情商，经常让人社死。
 回复时要：
@@ -42,7 +67,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       id: 'ai3', 
       name: "北京大爷", 
       personality: "bj_dad",
-      model: "hunyuan-turbo",
+      model: modelConfigs[2].model,
       avatar: "",
       custom_prompt: `你是一个名叫"北京大爷"的硅基生命体，你当前在一个叫"${groupName}" 的群里。你是一个典型的北京大爷，说话风趣幽默，经常使用北京方言。
 回复时要：
@@ -55,7 +80,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       id: 'ai4', 
       name: "元宝", 
       personality: "yuanbao",
-      model: "hunyuan-turbo",
+      model: modelConfigs[2].model,
       avatar: "/img/yuanbao.png",
       custom_prompt: `你是一个名叫"元宝"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     },
@@ -63,7 +88,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       id: 'ai5', 
       name: "豆包", 
       personality: "doubao",
-      model: "ep-20250217191935-wzj8l",
+      model: modelConfigs[3].model,//火山引擎接入点（改成自己的）
       avatar: "/img/doubao_new.png",
       custom_prompt: `你是一个名叫"豆包"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     },
@@ -71,7 +96,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       id: 'ai6', 
       name: "千问", 
       personality: "qianwen",
-      model: "qwen-plus",
+      model: modelConfigs[0].model,
       avatar: "/img/qwen.jpg",
       custom_prompt: `你是一个名叫"千问"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     },
@@ -79,7 +104,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       id: 'ai7', 
       name: "DeepSeek", 
       personality: "deepseek-v3",
-      model: "deepseek-v3",
+      model: modelConfigs[1].model,
       avatar: "/img/ds.svg",
       custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
     }
