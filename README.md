@@ -1,6 +1,6 @@
 # AI 多人聊天室
 
-一个基于 React 的多人 AI 聊天应用，支持多个 AI 角色同时参与对话，提供类似群聊的交互体验。
+一个基于 React 的多人 AI 聊天应用，支持多个 AI 角色同时参与对话，提供类似群聊的交互体验。体验地址：[https://botgroup.chat](https://botgroup.chat)
 
 ## 功能特点
 
@@ -14,12 +14,15 @@
 - 🎨 美观的 UI 界面
 - 📱 响应式设计，支持移动端
 
+## 演示截图
 
-
+![新闻观点互补](https://i.v2ex.co/2Sf2Uc3s.png)
+![文字游戏](https://i.v2ex.co/tu4a5mv9.png)
+![成语接龙](https://i.v2ex.co/F847yqQR.png)
 
 ## 一键部署到cloudflare
 
-1. [Fork本项目](https://github.com/new/import)到你的 GitHub 账号
+1. [Fork本项目](https://github.com/maojindao55/botgroup.chat/fork)到你的 GitHub 账号
 
 2. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
    - 进入  Workers & Pages 页面
@@ -29,7 +32,7 @@
 3. 配置部署选项
    - 选择你 fork 的仓库
    - 设置以下构建配置：
-     - Framework preset: React
+     - Framework preset: None
      - Build command: `npm run build`
      - Build output directory: `dist`
      - 设置环境变量（必须）：
