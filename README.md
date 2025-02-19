@@ -19,7 +19,7 @@
 
 ## 一键部署到cloudflare
 
-1. Fork 本项目到你的 GitHub 账号
+1. [Fork本项目](https://github.com/new/import)到你的 GitHub 账号
 
 2. 登录 [Cloudflare Dashboard](https://dash.cloudflare.com/)
    - 进入  Workers & Pages 页面
@@ -32,7 +32,7 @@
      - Framework preset: React
      - Build command: `npm run build`
      - Build output directory: `dist`
-     - 环境变量（必须）：
+     - 设置环境变量（必须）：
        ```
         DASHSCOPE_API_KEY=xxx //千问模型KEY
         HUNYUAN_API_KEY=xxx //混元模型KEY
@@ -48,28 +48,41 @@
 
 ## 自定义（可选）
 
-1. 配置 AI 角色
-   - 在 `config/aiCharacters.ts` 中配置 AI 角色信息
+1. 配置 模型和AI 角色
+
+   - 在 `config/aiCharacters.ts` 中
+
+        自定义模型
+
+        ```typescript
+        {
+            model: string;     // 模型标识, 请按照服务方实际模型名称配置(注意：豆包的配置需要填写火山引擎接入点)，比如qwen-plus,deepseek-v3,hunyuan-standard
+            apiKey: string;    // 模型的 API 密钥
+            baseURL: string;    // 模型的 baseURL
+        }
+        ```
+        
+        配置 AI 角色信息
         ```typescript
         id: string;        // 角色唯一标识
         name: string;      // 角色显示名称
         personality: string; // 角色性格描述
-        model: string;     // 使用的模型，可选值: qwen/hunyuan/ark
+        model: string;     // 使用的模型，要从modelConfigs中选择
         avatar?: string;   // 可选的头像 URL
         custom_prompt?: string;  // 可选的自定义提示词
         ```
    
-   示例配置：
-   ```typescript
-   {
-     id: "assistant1",
-     name: "小助手",
-     personality: "友善、乐于助人的AI助手",
-     model: "qwen",//注意豆包的配置需要填写火山引擎的接入点
-     avatar: "/avatars/assistant.png",
-     custom_prompt: "你是一个热心的助手，擅长解答各类问题。"
-   }
-   ```
+         示例配置：
+         ```typescript
+         {
+         id: "assistant1",
+         name: "小助手",
+         personality: "友善、乐于助人的AI助手",
+         model: "qwen",//注意豆包的配置需要填写火山引擎的接入点
+         avatar: "/avatars/assistant.png",
+         custom_prompt: "你是一个热心的助手，擅长解答各类问题。"
+         }
+         ```
 2. 配置群组
    - 在 `config/groups.ts` 中配置群组信息
         ```typescript
