@@ -525,13 +525,18 @@ const ChatUI = () => {
                 </div>
               ))}
               <div ref={messagesEndRef} />
+              {/* 添加一个二维码 */}
+              <div id="qrcode" className="flex flex-col items-center hidden">
+                <img src="/img/qr.png" alt="QR Code" className="w-24 h-24" />
+                <p className="text-sm text-gray-500 mt-2 font-medium tracking-tight bg-gray-50 px-3 py-1 rounded-full">扫码体验AI群聊</p>
+              </div>
             </div>
           </ScrollArea>
         </div>
 
         {/* Input Area */}
         <div className="bg-white border-t pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 px-4">
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -563,9 +568,8 @@ const ChatUI = () => {
               {isLoading ? (
                 <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
               ) : (
-                <Send className="w-4 h-4 mr-2" />
+                <Send className="w-4 h-4" />
               )}
-              发送
             </Button>
           </div>
         </div>

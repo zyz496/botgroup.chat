@@ -28,7 +28,10 @@ export function SharePoster({ isOpen, onClose, chatAreaRef }: SharePosterProps) 
     try {
       const messageContainer = chatAreaRef.current.querySelector('.space-y-4');
       if (!messageContainer) return;
-
+      const qrCode = messageContainer.querySelector('#qrcode');
+      if (qrCode) {
+        qrCode.classList.remove('hidden');
+      }
       // 预处理所有图片
       const preloadImages = async () => {
         const images = Array.from(messageContainer.getElementsByTagName('img'));
@@ -141,7 +144,16 @@ export function SharePoster({ isOpen, onClose, chatAreaRef }: SharePosterProps) 
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+      if (!open) {
+        // Hide QR code when dialog closes
+        const qrCode = chatAreaRef.current?.querySelector('#qrcode');
+        if (qrCode) {
+          qrCode.classList.add('hidden');
+        }
+        onClose();
+      }
+    }}>
       <DialogContent className="max-w-[95vw] w-full sm:max-w-[90vw] max-h-[90vh] flex flex-col p-0">
         {/* 图片容器 */}
         <div className="flex-1 overflow-auto p-1">
