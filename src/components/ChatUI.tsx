@@ -537,23 +537,25 @@ const ChatUI = () => {
         {/* Input Area */}
         <div className="bg-white border-t pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 px-4">
           <div className="flex gap-1">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button 
-                    variant="outline"
-                    size="icon"
-                    onClick={handleShareChat}
-                    className="px-3"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>分享聊天记录</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {messages.length > 0 && (
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="outline"
+                      size="icon"
+                      onClick={handleShareChat}
+                      className="px-3"
+                    >
+                      <Share2 className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>分享聊天记录</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
             <Input 
               placeholder="输入消息..." 
               className="flex-1"
