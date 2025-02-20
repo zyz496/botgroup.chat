@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Menu, MoreHorizontal, UserPlus, UserMinus, Users2, Users, MoreVertical, Mic, MicOff } from 'lucide-react';
+import { Send, Menu, MoreHorizontal, UserPlus, UserMinus, Users2, Users, MoreVertical, Share2, Mic, MicOff } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,6 +25,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
+import html2canvas from 'html2canvas';
+import { SharePoster } from '@/components/SharePoster';
 
 // 使用本地头像数据，避免外部依赖
 const getAvatarData = (name: string) => {
@@ -349,6 +351,16 @@ const ChatUI = () => {
     };
   }, []);
 
+  // 添加对聊天区域的引用
+  const chatAreaRef = useRef<HTMLDivElement>(null);
+
+  // 更新分享函数
+  const [showPoster, setShowPoster] = useState(false);
+
+  const handleShareChat = () => {
+    setShowPoster(true);
+  };
+
   return (
     <>
       <KaTeXStyle />
@@ -437,7 +449,7 @@ const ChatUI = () => {
         {/* Main Chat Area */}
         <div className="flex-1 overflow-hidden">
           <ScrollArea className="h-full p-4">
-            <div className="space-y-4">
+            <div className="space-y-4" ref={chatAreaRef}>
               {messages.map((message) => (
                 <div key={message.id} 
                   className={`flex items-start gap-2 ${message.sender.name === "我" ? "justify-end" : ""}`}>
@@ -520,6 +532,23 @@ const ChatUI = () => {
         {/* Input Area */}
         <div className="bg-white border-t pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 px-4">
           <div className="flex gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    variant="outline"
+                    size="icon"
+                    onClick={handleShareChat}
+                    className="px-3"
+                  >
+                    <Share2 className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>分享聊天记录</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             <Input 
               placeholder="输入消息..." 
               className="flex-1"
@@ -615,6 +644,13 @@ const ChatUI = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* 添加 SharePoster 组件 */}
+      <SharePoster 
+        isOpen={showPoster}
+        onClose={() => setShowPoster(false)}
+        chatAreaRef={chatAreaRef}
+      />
     </>
   );
 };
