@@ -16,6 +16,8 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dom-to-image": "^2.6.0",
+    "dom-to-image-more": "^3.5.0",
     "html2canvas": "^1.4.1",
     "katex": "^0.16.21",
     "lucide-react": "^0.263.1",
@@ -26,6 +28,7 @@
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
+    "sonner": "^2.0.0",
     "tailwind-merge": "^2.6.0",
     "tailwind-scrollbar-hide": "^2.0.0",
     "tailwindcss-animate": "^1.0.7"
