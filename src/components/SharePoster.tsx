@@ -77,7 +77,7 @@ export function SharePoster({ isOpen, onClose, chatAreaRef }: SharePosterProps) 
         style: {
           padding: `${extraSpace}px`,
           margin: '0',
-          width: '110%',
+          width: '120%',
           height: '110%',
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
@@ -111,7 +111,7 @@ export function SharePoster({ isOpen, onClose, chatAreaRef }: SharePosterProps) 
       });
 
       // 创建高分辨率canvas
-      const scale = 2; // 将分辨率提高2倍
+      const scale = 2;
       const canvas = document.createElement('canvas');
       canvas.width = img.width * scale;
       canvas.height = img.height * scale;
@@ -121,22 +121,36 @@ export function SharePoster({ isOpen, onClose, chatAreaRef }: SharePosterProps) 
         throw new Error('无法创建canvas上下文');
       }
 
-      // 设置更好的图像渲染质量
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
-      
-      // 按比例缩放绘制
       ctx.scale(scale, scale);
       ctx.drawImage(img, 0, 0);
       
-      // 使用更高质量的PNG导出
-      const pngUrl = canvas.toDataURL('image/png', 1.0);
-      const a = document.createElement('a');
-      a.href = pngUrl;
-      a.download = 'chat-history.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      // 转换为Blob
+      const blob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((blob) => {
+          resolve(blob!);
+        }, 'image/png', 1.0);
+      });
+
+      // 检查是否为移动设备
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && navigator.share) {
+        // 使用系统分享
+        await navigator.share({
+          files: [new File([blob], 'chat-history.png', { type: 'image/png' })],
+          title: '聊天记录',
+        });
+      } else {
+        // PC端使用传统下载方式
+        const pngUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = pngUrl;
+        a.download = 'chat-history.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(pngUrl);
+      }
     } catch (error) {
       console.error('转换图片失败:', error);
       toast.error('保存图片失败，请重试');
@@ -154,15 +168,15 @@ export function SharePoster({ isOpen, onClose, chatAreaRef }: SharePosterProps) 
         onClose();
       }
     }}>
-      <DialogContent className="max-w-[95vw] w-full sm:max-w-[90vw] max-h-[90vh] flex flex-col p-0">
+      <DialogContent className="max-w-[100vw] w-full sm:max-w-[100vw] max-h-[90vh] flex flex-col p-0">
         {/* 图片容器 */}
-        <div className="flex-1 overflow-auto p-1">
+        <div className="flex-1 overflow-auto ">
           {posterImage && (
             <div className="flex items-center justify-center min-h-full">
               <img 
                 src={posterImage} 
                 alt="Share Poster" 
-                className="max-w-full w-auto h-auto" 
+                className="w-full w-auto h-auto" 
                 style={{
                   objectFit: 'contain',
                   imageRendering: 'crisp-edges',

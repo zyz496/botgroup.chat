@@ -448,7 +448,7 @@ const ChatUI = () => {
 
         {/* Main Chat Area */}
         <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-full p-4" ref={chatAreaRef}>
+          <ScrollArea className="h-full p-2" ref={chatAreaRef}>
             <div className="space-y-4">
               {messages.map((message) => (
                 <div key={message.id} 
