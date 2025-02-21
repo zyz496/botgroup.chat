@@ -116,6 +116,10 @@
 
 欢迎提交 Pull Request 或提出 Issue。
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=maojindao55/botgroup.chat&type=Date)](https://star-history.com/#maojindao55/botgroup.chat&Date)
+
 ## 许可证
 
 [MIT License](LICENSE)
