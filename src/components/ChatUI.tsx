@@ -191,6 +191,8 @@ const ChatUI = () => {
   };
 
   const handleSendMessage = async () => {
+    //判断是否Loding
+    if (isLoading) return;
     if (!inputMessage.trim()) return;
 
     // 添加用户消息
