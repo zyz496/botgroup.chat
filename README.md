@@ -110,6 +110,20 @@
    - 每个群组必须至少包含两个成员
    - 群组 ID 在系统中必须唯一
 
+## 本地环境启动/调试
+由于本项目后端server使用的是Cloudflare-Pages-Function（本质是worker）
+
+1. 所以本地部署需要 [安装 wrangler](https://developers.cloudflare.com/workers/wrangler/install-and-update/):
+
+   ``
+   npm install wrangler --save-dev
+   ``
+
+2. 使用本项目启动脚本启动 
+
+   `sh devrun.sh` 本地默认预览地址是：http://127.0.0.1:8788
+
+
 
 
 ## 贡献指南
