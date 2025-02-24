@@ -129,6 +129,7 @@
 ## 贡献指南
 
 欢迎提交 Pull Request 或提出 Issue。
+当然也可以加共建QQ群交流：922322461（群号）
 
 ## Star History
 
