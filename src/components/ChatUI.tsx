@@ -214,16 +214,27 @@ const ChatUI = () => {
       content: msg.sender.name == "我" ? 'user：' + msg.content :  msg.sender.name + '：' + msg.content,
       name: msg.sender.name
     }));
-
-    for (let i = 0; i < groupAiCharacters.length; i++) {
+    let selectedGroupAiCharacters = groupAiCharacters;
+    // 调度器api请求
+    const shedulerResponse = await fetch('/api/scheduler', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ message: inputMessage, history: messageHistory, availableAIs: groupAiCharacters })
+    });
+    const shedulerData = await shedulerResponse.json();
+    const selectedAIs = shedulerData.selectedAIs;
+    selectedGroupAiCharacters = selectedAIs.map(ai => groupAiCharacters.find(c => c.id === ai));
+    for (let i = 0; i < selectedGroupAiCharacters.length; i++) {
       //禁言
-      if (mutedUsers.includes(groupAiCharacters[i].id)) {
+      if (mutedUsers.includes(selectedGroupAiCharacters[i].id)) {
         continue;
       }
       // 创建当前 AI 角色的消息
       const aiMessage = {
         id: messages.length + 2 + i,
-        sender: { id: groupAiCharacters[i].id, name: groupAiCharacters[i].name, avatar: groupAiCharacters[i].avatar },
+        sender: { id: selectedGroupAiCharacters[i].id, name: selectedGroupAiCharacters[i].name, avatar: selectedGroupAiCharacters[i].avatar },
         content: "",
         isAI: true
       };
@@ -238,13 +249,13 @@ const ChatUI = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: groupAiCharacters[i].model,
+            model: selectedGroupAiCharacters[i].model,
             message: inputMessage,
-            personality: groupAiCharacters[i].personality,
+            personality: selectedGroupAiCharacters[i].personality,
             history: messageHistory,
             index: i,
-            aiName: groupAiCharacters[i].name,
-            custom_prompt: groupAiCharacters[i].custom_prompt
+            aiName: selectedGroupAiCharacters[i].name,
+            custom_prompt: selectedGroupAiCharacters[i].custom_prompt
           }),
         });
 

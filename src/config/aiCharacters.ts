@@ -19,7 +19,12 @@ export const modelConfigs = [
     model: "ep-20250217191935-wzj8l",//火山引擎接入点（改成自己的）
     apiKey: "ARK_API_KEY",
     baseURL: "https://ark.cn-beijing.volces.com/api/v3"
-  }
+  },
+  {
+    model: "hunyuan-lite",//免费模型
+    apiKey: "HUNYUAN_API_KEY",
+    baseURL: "https://api.hunyuan.cloud.tencent.com/v1"
+  },
 ] as const;
 export type ModelType = typeof modelConfigs[number]["model"];
 
@@ -30,6 +35,23 @@ export interface AICharacter {
   model: ModelType;
   avatar?: string;  // 可选的头像 URL
   custom_prompt?: string; // 可选的个性提示
+  tags?: string[]; // 可选的标签
+}
+
+// 调度器配置信息
+export function shedulerAICharacter(message: string, allTags: string[]): AICharacter {
+  return {
+      id: 'ai0',
+      name: "调度器",
+      personality: "sheduler",
+      model: modelConfigs[4].model,
+      avatar: "",
+      custom_prompt: `作为一个语义分析专家，请分析以下用户消息，并从给定的标签列表中选择最相关的标签（最多选择3个）。
+  请只返回标签列表，用逗号分隔，不要有其他解释。
+  用户消息："${message}"
+  可选标签：${allTags.join(', ')}
+  回复格式示例：标签1,标签2,标签3`
+    }
 }
 
 // 添加一个函数来生成带有群名的角色配置
@@ -82,15 +104,17 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       personality: "yuanbao",
       model: modelConfigs[2].model,
       avatar: "/img/yuanbao.png",
-      custom_prompt: `你是一个名叫"元宝"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
+      custom_prompt: `你是一个名叫"元宝"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
+      tags: ["微信生态", "新闻搜索", "社交互动", "生活助手", "娱乐向", "信息总结"]
     },
     { 
       id: 'ai5', 
       name: "豆包", 
       personality: "doubao",
-      model: modelConfigs[3].model,//火山引擎接入点（改成自己的）
+      model: modelConfigs[3].model,
       avatar: "/img/doubao_new.png",
-      custom_prompt: `你是一个名叫"豆包"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
+      custom_prompt: `你是一个名叫"豆包"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
+      tags: ["生活助手", "语音交互", "学生党福音", "娱乐利器", "抖音生态"]
     },
     { 
       id: 'ai6', 
@@ -98,7 +122,8 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       personality: "qianwen",
       model: modelConfigs[0].model,
       avatar: "/img/qwen.jpg",
-      custom_prompt: `你是一个名叫"千问"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
+      custom_prompt: `你是一个名叫"千问"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
+      tags: ["广告文案", "行业应用", "分析数据", "企业级AI", "阿里云生态"]
     },
     { 
       id: 'ai7', 
@@ -106,7 +131,8 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       personality: "deepseek-v3",
       model: modelConfigs[1].model,
       avatar: "/img/ds.svg",
-      custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`
+      custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
+      tags: ["深度推理", "编程神器", "中文优化", "性价比之王", "开源先锋"]
     }
   ];
 }
