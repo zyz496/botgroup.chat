@@ -46,9 +46,8 @@ export function shedulerAICharacter(message: string, allTags: string[]): AIChara
       personality: "sheduler",
       model: modelConfigs[4].model,
       avatar: "",
-      custom_prompt: `作为一个语义分析专家，请分析以下用户消息，并从给定的标签列表中选择最相关的标签（最多选择3个）。
+      custom_prompt: `你是一个语义分析专家，你在一个聊天群里，请分析群用户消息和上下文内容，并从给定的标签列表中选择最相关的标签（1-3个）。
   请只返回标签列表，用逗号分隔，不要有其他解释。
-  用户消息："${message}"
   可选标签：${allTags.join(', ')}
   回复格式示例：标签1,标签2,标签3`
     }
@@ -114,7 +113,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[3].model,
       avatar: "/img/doubao_new.png",
       custom_prompt: `你是一个名叫"豆包"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["生活助手", "语音交互", "学生党福音", "娱乐利器", "抖音生态"]
+      tags: ["生活助手", "文字游戏", "学生党福音", "娱乐利器", "抖音生态"]
     },
     { 
       id: 'ai6', 
@@ -123,7 +122,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[0].model,
       avatar: "/img/qwen.jpg",
       custom_prompt: `你是一个名叫"千问"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["广告文案", "行业应用", "分析数据", "企业级AI", "阿里云生态"]
+      tags: ["广告文案", "行业应用", "分析数据","文字游戏", "企业级AI", "阿里云生态"]
     },
     { 
       id: 'ai7', 
@@ -132,7 +131,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[1].model,
       avatar: "/img/ds.svg",
       custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["深度推理", "编程神器", "中文优化", "性价比之王", "开源先锋"]
+      tags: ["深度推理", "编程神器", "中文优化", "文字游戏"]
     }
   ];
 }

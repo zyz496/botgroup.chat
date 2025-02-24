@@ -16,7 +16,7 @@ interface MessageHistory {
 export async function onRequestPost({ env, request }) {
   try {
     const { message, history, availableAIs } = await request.json();
-    const selectedAIs = await scheduleAIResponses(message, history, availableAIs);
+    const selectedAIs = await scheduleAIResponses(message, history, availableAIs, env);
 
     return Response.json({
       selectedAIs: selectedAIs
@@ -30,36 +30,43 @@ export async function onRequestPost({ env, request }) {
   }
 }
 
-async function analyzeMessageWithAI(message: string, allTags: string[]): Promise<string[]> {
+async function analyzeMessageWithAI(message: string, allTags: string[], env: any, history: MessageHistory[] = []): Promise<string[]> {
     const shedulerAI = shedulerAICharacter(message, allTags);
     const modelConfig = modelConfigs.find(config => config.model === shedulerAI.model);
+    const apiKey = env[modelConfig.apiKey];
+    if (!apiKey) {
+      throw new Error(`${modelConfig.model} 的API密钥未配置`);
+    }
     const openai = new OpenAI({
-    apiKey: modelConfig.apiKey,
-    baseURL: modelConfig.baseURL, // DeepSeek API 的基础URL
-  });
-
-  const prompt = shedulerAI.custom_prompt;
-
-  try {
-    const completion = await openai.chat.completions.create({
-      model: shedulerAI.model,
-      messages: [
-        { role: "user", content: prompt }
-      ],
+      apiKey: apiKey,
+      baseURL: modelConfig.baseURL,
     });
 
-    const matchedTags = completion.choices[0].message.content?.split(',').map(tag => tag.trim()) || [];
-    return matchedTags;
-  } catch (error) {
-    console.error('AI分析失败:', error);
-    return [];
-  }
+    const prompt = shedulerAI.custom_prompt;
+
+    try {
+      const completion = await openai.chat.completions.create({
+        model: shedulerAI.model,
+        messages: [
+          { role: "user", content: prompt },
+          ...history.slice(-10), // 添加历史消息
+          { role: "user", content: message }
+        ],
+      });
+
+      const matchedTags = completion.choices[0].message.content?.split(',').map(tag => tag.trim()) || [];
+      return matchedTags;
+    } catch (error) {
+      console.error('AI分析失败:', error);
+      return [];
+    }
 }
 
 async function scheduleAIResponses(
   message: string, 
   history: MessageHistory[], 
-  availableAIs: AICharacter[]
+  availableAIs: AICharacter[],
+  env: any
 ): Promise<string[]> {
   // 1. 收集所有可用的标签
   const allTags = new Set<string>();
@@ -68,8 +75,12 @@ async function scheduleAIResponses(
   });
 
   // 2. 使用AI模型分析消息并匹配标签
-  const matchedTags = await analyzeMessageWithAI(message, Array.from(allTags));
-
+  const matchedTags = await analyzeMessageWithAI(message, Array.from(allTags), env, history);
+  console.log('matchedTags', matchedTags, allTags);
+  //如果含有"文字游戏"标签，则需要全员参与
+  if (matchedTags.includes("文字游戏")) {
+    return availableAIs.map(ai => ai.id);
+  }
   // 3. 计算每个AI的匹配分数
   const aiScores = new Map<string, number>();
   const messageLC = message.toLowerCase();
@@ -110,6 +121,7 @@ async function scheduleAIResponses(
 
   // 5. 如果没有匹配到任何AI，随机选择1-2个
   if (sortedAIs.length === 0) {
+    console.log('没有匹配到任何AI，随机选择1-2个');
     const maxResponders = Math.min(2, availableAIs.length);
     const numResponders = Math.floor(Math.random() * maxResponders) + 1;
     
