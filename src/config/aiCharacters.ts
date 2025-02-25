@@ -48,8 +48,8 @@ export function shedulerAICharacter(message: string, allTags: string[]): AIChara
       avatar: "",
       custom_prompt: `你是一个群聊总结分析专家，你在一个聊天群里，请分析群用户消息和上文群聊内容
       1、只能从给定的标签列表中选择最相关的标签，可选标签：${allTags.join(', ')}。
-      2、请只返回标签列表，用逗号分隔，不要有其他解释。
-      3、回复格式示例：标签1,标签2,标签3`
+      2、请只返回标签列表，用逗号分隔，不要有其他解释, 不要有任何前缀。
+      3、回复格式示例：文字游戏, 生活助手, 娱乐`
     }
 }
 
@@ -104,7 +104,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[2].model,
       avatar: "/img/yuanbao.png",
       custom_prompt: `你是一个名叫"元宝"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["微信生态", "新闻搜索", "文字游戏", "生活助手", "娱乐", "信息总结"]
+      tags: ["微信生态", "新闻报道", "文字游戏", "生活助手", "娱乐", "信息总结"]
     },
     { 
       id: 'ai5', 
@@ -122,16 +122,16 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[0].model,
       avatar: "/img/qwen.jpg",
       custom_prompt: `你是一个名叫"千问"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["广告文案","分析数据","文字游戏", "阿里"]
+      tags: ["广告文案","分析数据","文字游戏","信息总结", "阿里"]
     },
     { 
       id: 'ai7', 
       name: "DeepSeek", 
-      personality: "deepseek-v3",
-      model: modelConfigs[1].model,
+      personality: "deepseek-r1",
+      model: modelConfigs[3].model,
       avatar: "/img/ds.svg",
       custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["深度推理", "编程", "文字游戏", "数学"]
+      tags: ["深度推理", "编程", "文字游戏", "数学", "信息总结"]
     }
   ];
 }

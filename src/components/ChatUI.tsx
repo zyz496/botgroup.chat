@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Menu, MoreHorizontal, UserPlus, UserMinus, Users2, Users, MoreVertical, Share2, Mic, MicOff } from 'lucide-react';
+import { Send, Menu, MoreHorizontal, UserPlus, UserMinus, Users2, Users, MoreVertical, Share2, Mic, MicOff, Settings2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/tooltip";
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet"
 
 import {generateAICharacters} from "@/config/aiCharacters";
 import { groups } from "@/config/groups";
@@ -27,6 +27,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import html2canvas from 'html2canvas';
 import { SharePoster } from '@/components/SharePoster';
+import { MembersManagement } from '@/components/MembersManagement';
 
 // 使用本地头像数据，避免外部依赖
 const getAvatarData = (name: string) => {
@@ -117,9 +118,9 @@ const QuarterAvatar = ({ user, index }: { user: User, index: number }) => {
   );
 };
 
-// 动态导入 KaTeX 样式
+// 修改 KaTeXStyle 组件
 const KaTeXStyle = () => (
-  <style jsx global>{`
+  <style dangerouslySetInnerHTML={{ __html: `
     /* 只在聊天消息内应用 KaTeX 样式 */
     .chat-message .katex-html {
       display: none;
@@ -141,11 +142,12 @@ const KaTeXStyle = () => (
     
     /* 其他必要的 KaTeX 样式 */
     @import "katex/dist/katex.min.css";
-  `}</style>
+  `}} />
 );
 
 const ChatUI = () => {
   const [group, setGroup] = useState(groups[1]);
+  const [isGroupDiscussionMode, setIsGroupDiscussionMode] = useState(false);
   const groupAiCharacters = generateAICharacters(group.name).filter(character => group.members.includes(character.id));
   const [users, setUsers] = useState([
     { id: 1, name: "我" },
@@ -215,17 +217,18 @@ const ChatUI = () => {
       name: msg.sender.name
     }));
     let selectedGroupAiCharacters = groupAiCharacters;
-    // 调度器api请求
-    const shedulerResponse = await fetch('/api/scheduler', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ message: inputMessage, history: messageHistory, availableAIs: groupAiCharacters })
-    });
-    const shedulerData = await shedulerResponse.json();
-    const selectedAIs = shedulerData.selectedAIs;
-    selectedGroupAiCharacters = selectedAIs.map(ai => groupAiCharacters.find(c => c.id === ai));
+    if (!isGroupDiscussionMode) {
+      const shedulerResponse = await fetch('/api/scheduler', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: inputMessage, history: messageHistory, availableAIs: groupAiCharacters })
+      });
+      const shedulerData = await shedulerResponse.json();
+      const selectedAIs = shedulerData.selectedAIs;
+      selectedGroupAiCharacters = selectedAIs.map(ai => groupAiCharacters.find(c => c.id === ai));
+    }
     for (let i = 0; i < selectedGroupAiCharacters.length; i++) {
       //禁言
       if (mutedUsers.includes(selectedGroupAiCharacters[i].id)) {
@@ -453,7 +456,7 @@ const ChatUI = () => {
                 )}
               </div>
               <Button variant="ghost" size="icon" onClick={() => setShowMembers(true)}>
-                <Users className="w-5 h-5" />
+                <Settings2 className="w-5 h-5" />
               </Button>
             </div>
           </div>
@@ -590,78 +593,16 @@ const ChatUI = () => {
         </div>
 
         {/* Members Management Dialog */}
-        <Dialog open={showMembers} onOpenChange={setShowMembers}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>群成员管理</DialogTitle>
-            </DialogHeader>
-            <div className="mt-4">
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-gray-500">当前成员（{users.length}）</span>
-                <Button variant="outline" size="sm">
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  添加成员
-                </Button>
-              </div>
-              <ScrollArea className="h-[300px]">
-                <div className="space-y-2">
-                  {users.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          {'avatar' in user && user.avatar ? (
-                            <AvatarImage src={user.avatar} className="w-10 h-10" /> 
-                          ) : (
-                            <AvatarFallback style={{ backgroundColor: getAvatarData(user.name).backgroundColor, color: 'white' }}>
-                              {user.name[0]}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <div className="flex flex-col">
-                          <span>{user.name}</span>
-                          {mutedUsers.includes(user.id) && (
-                            <span className="text-xs text-red-500">已禁言</span>
-                          )}
-                        </div>
-                      </div>
-                      {user.name !== "我" && (
-                        <div className="flex gap-2">
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="icon"
-                                  onClick={() => handleToggleMute(user.id)}
-                                >
-                                  {mutedUsers.includes(user.id) ? (
-                                    <MicOff className="w-4 h-4 text-red-500" />
-                                  ) : (
-                                    <Mic className="w-4 h-4 text-green-500" />
-                                  )}
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {mutedUsers.includes(user.id) ? '取消禁言' : '禁言'}
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                          {/*<Button 
-                            variant="ghost" 
-                            size="icon"
-                            onClick={() => handleRemoveUser(user.id)}
-                          >
-                            <UserMinus className="w-4 h-4 text-red-500" />
-                          </Button>*/}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <MembersManagement 
+          showMembers={showMembers}
+          setShowMembers={setShowMembers}
+          users={users}
+          mutedUsers={mutedUsers}
+          handleToggleMute={handleToggleMute}
+          isGroupDiscussionMode={isGroupDiscussionMode}
+          onToggleGroupDiscussion={() => setIsGroupDiscussionMode(!isGroupDiscussionMode)}
+          getAvatarData={getAvatarData}
+        />
       </div>
 
       {/* 添加 SharePoster 组件 */}
