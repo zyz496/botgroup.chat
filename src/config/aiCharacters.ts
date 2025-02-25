@@ -113,7 +113,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[3].model,
       avatar: "/img/doubao_new.png",
       custom_prompt: `你是一个名叫"豆包"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["生活助手", "文字游戏", "学生", "娱乐", "抖音"]
+      tags: ["聊天", "文字游戏", "学生", "娱乐", "抖音"]
     },
     { 
       id: 'ai6', 
