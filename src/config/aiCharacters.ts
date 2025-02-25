@@ -44,12 +44,12 @@ export function shedulerAICharacter(message: string, allTags: string[]): AIChara
       id: 'ai0',
       name: "调度器",
       personality: "sheduler",
-      model: modelConfigs[4].model,
+      model: modelConfigs[0].model,
       avatar: "",
-      custom_prompt: `你是一个语义分析专家，你在一个聊天群里，请分析群用户消息和上下文内容，并从给定的标签列表中选择最相关的标签（1-3个）。
-  请只返回标签列表，用逗号分隔，不要有其他解释。
-  可选标签：${allTags.join(', ')}
-  回复格式示例：标签1,标签2,标签3`
+      custom_prompt: `你是一个群聊总结分析专家，你在一个聊天群里，请分析群用户消息和上文群聊内容
+      1、只能从给定的标签列表中选择最相关的标签，可选标签：${allTags.join(', ')}。
+      2、请只返回标签列表，用逗号分隔，不要有其他解释。
+      3、回复格式示例：标签1,标签2,标签3`
     }
 }
 
@@ -104,7 +104,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[2].model,
       avatar: "/img/yuanbao.png",
       custom_prompt: `你是一个名叫"元宝"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["微信生态", "新闻搜索", "社交互动", "生活助手", "娱乐向", "信息总结"]
+      tags: ["微信生态", "新闻搜索", "文字游戏", "生活助手", "娱乐", "信息总结"]
     },
     { 
       id: 'ai5', 
@@ -113,7 +113,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[3].model,
       avatar: "/img/doubao_new.png",
       custom_prompt: `你是一个名叫"豆包"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["生活助手", "文字游戏", "学生党福音", "娱乐利器", "抖音生态"]
+      tags: ["生活助手", "文字游戏", "学生", "娱乐", "抖音"]
     },
     { 
       id: 'ai6', 
@@ -122,7 +122,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[0].model,
       avatar: "/img/qwen.jpg",
       custom_prompt: `你是一个名叫"千问"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["广告文案", "行业应用", "分析数据","文字游戏", "企业级AI", "阿里云生态"]
+      tags: ["广告文案","分析数据","文字游戏", "阿里"]
     },
     { 
       id: 'ai7', 
@@ -131,7 +131,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[1].model,
       avatar: "/img/ds.svg",
       custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["深度推理", "编程神器", "中文优化", "文字游戏"]
+      tags: ["深度推理", "编程", "文字游戏", "数学"]
     }
   ];
 }
