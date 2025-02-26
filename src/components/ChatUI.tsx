@@ -380,8 +380,8 @@ const ChatUI = () => {
   return (
     <>
       <KaTeXStyle />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-start md:items-center justify-center">
-        <div className="h-screen flex flex-col bg-white w-full mx-auto relative shadow-xl md:max-w-3xl md:h-[95dvh] md:my-auto md:rounded-lg">
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-start md:items-center justify-center overflow-hidden">
+        <div className="h-full flex flex-col bg-white w-full mx-auto relative shadow-xl md:max-w-3xl md:h-[95dvh] md:my-auto md:rounded-lg">
           {/* Header */}
           <header className="bg-white shadow flex-none md:rounded-t-lg">
             <div className="flex items-center justify-between px-4 py-3">
@@ -552,8 +552,8 @@ const ChatUI = () => {
           </div>
 
           {/* Input Area */}
-          <div className="bg-white border-t pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 px-4 md:rounded-b-lg">
-            <div className="flex gap-1">
+          <div className="bg-white border-t pb-3 pt-3 px-4 md:rounded-b-lg">
+            <div className="flex gap-1 pb-[env(safe-area-inset-bottom)]">
               {messages.length > 0 && (
                 <TooltipProvider>
                   <Tooltip>
