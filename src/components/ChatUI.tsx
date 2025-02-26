@@ -381,9 +381,9 @@ const ChatUI = () => {
     <>
       <KaTeXStyle />
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-center justify-center">
-        <div className="h-[100dvh] flex flex-col bg-white max-w-3xl w-full mx-auto relative shadow-xl">
+        <div className="h-[100dvh] flex flex-col bg-white w-full mx-auto relative shadow-xl md:max-w-3xl md:h-[95dvh] md:rounded-lg">
           {/* Header */}
-          <header className="bg-white shadow flex-none">
+          <header className="bg-white shadow flex-none md:rounded-t-lg">
             <div className="flex items-center justify-between px-4 py-3">
               {/* 左侧群组信息 */}
               <div className="flex items-center gap-1.5">
@@ -552,7 +552,7 @@ const ChatUI = () => {
           </div>
 
           {/* Input Area */}
-          <div className="bg-white border-t pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 px-4">
+          <div className="bg-white border-t pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 px-4 md:rounded-b-lg">
             <div className="flex gap-1">
               {messages.length > 0 && (
                 <TooltipProvider>
