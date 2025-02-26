@@ -60,7 +60,7 @@ export function SharePoster({ isOpen, onClose, chatAreaRef }: SharePosterProps) 
       chatAreaRef.current.scrollTop = 0;
 
       const viewportWidth = Math.min(window.innerWidth, document.documentElement.clientWidth);
-      const extraSpace = 20;
+      const extraSpace = 6;
       const targetWidth = viewportWidth * 0.95 - (extraSpace * 2);
 
       const currentWidth = messageContainer.getBoundingClientRect().width;
