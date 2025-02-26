@@ -72,17 +72,18 @@ export function SharePoster({ isOpen, onClose, chatAreaRef }: SharePosterProps) 
       const dataUrl = await domtoimage.toSvg(messageContainer as HTMLElement, {
         bgcolor: '#f3f4f6',
         scale: 1,  // 回到较安全的值
-        width: targetWidth + (extraSpace * 2),
-        height: adjustedHeight + (extraSpace * 2),
+        width: targetWidth + (extraSpace * 5),
+        height: adjustedHeight + (extraSpace * 5),
         style: {
           padding: `${extraSpace}px`,
-          margin: '0',
+          margin: '0 auto',
           width: '120%',
           height: '110%',
           transform: `scale(${scale})`,
           transformOrigin: 'top left',
           background: '#f3f4f6',
           boxSizing: 'border-box'
+          
         },
         quality: 1.0
       });
@@ -168,7 +169,7 @@ export function SharePoster({ isOpen, onClose, chatAreaRef }: SharePosterProps) 
         onClose();
       }
     }}>
-      <DialogContent className="max-w-[100vw] w-full sm:max-w-[100vw] max-h-[90vh] flex flex-col p-0">
+      <DialogContent className="max-w-[100vw] w-full sm:max-w-[50vw] max-h-[90vh] flex flex-col p-0">
         {/* 图片容器 */}
         <div className="flex-1 overflow-auto ">
           {posterImage && (
