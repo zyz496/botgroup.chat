@@ -25,6 +25,11 @@ export const modelConfigs = [
     apiKey: "HUNYUAN_API_KEY",
     baseURL: "https://api.hunyuan.cloud.tencent.com/v1"
   },
+  {
+    model: "glm-4-plus",
+    apiKey: "GLM_API_KEY",
+    baseURL: "https://open.bigmodel.cn/api/paas/v4/"
+  }
 ] as const;
 export type ModelType = typeof modelConfigs[number]["model"];
 
@@ -132,6 +137,15 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       avatar: "/img/ds.svg",
       custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
       tags: ["深度推理", "编程", "文字游戏", "数学", "信息总结"]
+    },
+    { 
+      id: 'ai8', 
+      name: "智普", 
+      personality: "glm",
+      model: modelConfigs[5].model,
+      avatar: "/img/glm.gif",
+      custom_prompt: `你是一个名叫"智普"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
+      tags: ["新闻报道","分析数据","文字游戏","信息总结"]
     }
   ];
 }
