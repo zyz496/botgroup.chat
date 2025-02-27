@@ -416,7 +416,7 @@ const ChatUI = () => {
                       </div>
                     )}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 bg-[#ff6600] w-3 h-3 border-2 border-white"></div>
+                  <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 border-2 border-white"></div>
                 </div>
                 <div>
                   <h1 className="font-medium text-base">{group.name}</h1>
