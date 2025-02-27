@@ -380,7 +380,7 @@ const ChatUI = () => {
   return (
     <>
       <KaTeXStyle />
-      <div className="fixed inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex items-start md:items-center justify-center overflow-hidden">
+      <div className="fixed inset-0 bg-gradient-to-br from-orange-50 via-orange-50/70 to-orange-100 flex items-start md:items-center justify-center overflow-hidden">
         <div className="h-full flex flex-col bg-white w-full mx-auto relative shadow-xl md:max-w-3xl md:h-[95dvh] md:my-auto md:rounded-lg">
           {/* Header */}
           <header className="bg-white shadow flex-none md:rounded-t-lg">
@@ -416,7 +416,7 @@ const ChatUI = () => {
                       </div>
                     )}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 border-2 border-white"></div>
+                  <div className="absolute -bottom-0.5 -right-0.5 bg-[#ff6600] w-3 h-3 border-2 border-white"></div>
                 </div>
                 <div>
                   <h1 className="font-medium text-base">{group.name}</h1>
