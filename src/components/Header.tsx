@@ -1,31 +1,20 @@
 import React, { useEffect } from 'react';
 import GitHubButton from 'react-github-btn';
+import '@fontsource/audiowide';
+
+
 
 const Header: React.FC = () => {
-  useEffect(() => {
-    const fetchGitHubStars = async () => {
-      try {
-        const response = await fetch('https://api.github.com/repos/maojindao55/botgroup.chat');
-        const data = await response.json();
-        const starsElement = document.getElementById('github-stars');
-        if (starsElement) {
-          starsElement.textContent = data.stargazers_count.toLocaleString();
-        }
-      } catch (error) {
-        console.error('Failed to fetch GitHub stars:', error);
-      }
-    };
-
-    fetchGitHubStars();
-  }, []);
-
   return (
     <header className="bg-transparent fixed top-0 left-0 right-0 z-50 hidden md:block">
-      <div className="w-full px-2 h-10 flex items-center">
+      <div className="w-full px-2 h-10 flex items-center" >
         {/* Logo */}
         <div className="flex-1 flex items-center">
-          <a href="/" className="text-sm font-medium text-gray-700 hover:text-gray-500">
-            botgroup.chat
+          <a href="/" className="flex items-center">
+            <img src="/img/logo.svg" alt="logo" className="h-6 w-6 mr-2" />
+            <span style={{ fontFamily: 'Audiowide, system-ui', color: '#ff6600' }} className="text-2xl">
+              botgroup.chat
+            </span>
           </a>
         </div>
 
