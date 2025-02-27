@@ -16,20 +16,25 @@ export const modelConfigs = [
     baseURL: "https://api.hunyuan.cloud.tencent.com/v1"
   },
   {
-    model: "ep-20250217191935-wzj8l",//火山引擎接入点（改成自己的）
+    model: "ep-20250217191935-wzj8l",//豆包模型|火山引擎接入点（改成自己的）
     apiKey: "ARK_API_KEY",
     baseURL: "https://ark.cn-beijing.volces.com/api/v3"
   },
   {
-    model: "hunyuan-lite",//免费模型
-    apiKey: "HUNYUAN_API_KEY",
-    baseURL: "https://api.hunyuan.cloud.tencent.com/v1"
+    model: "ep-20250227191640-4qkq6",//deepseek-r火山引擎接入点（改成自己的）
+    apiKey: "ARK_API_KEY",
+    baseURL: "https://ark.cn-beijing.volces.com/api/v3"
   },
   {
     model: "glm-4-plus",
     apiKey: "GLM_API_KEY",
     baseURL: "https://open.bigmodel.cn/api/paas/v4/"
-  }
+  },
+  {
+    model: "qwen-turbo",//调度模型
+    apiKey: "DASHSCOPE_API_KEY", // 这里存储环境变量的 key 名称
+    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  },
 ] as const;
 export type ModelType = typeof modelConfigs[number]["model"];
 
@@ -49,7 +54,7 @@ export function shedulerAICharacter(message: string, allTags: string[]): AIChara
       id: 'ai0',
       name: "调度器",
       personality: "sheduler",
-      model: modelConfigs[0].model,
+      model: modelConfigs[6].model,
       avatar: "",
       custom_prompt: `你是一个群聊总结分析专家，你在一个聊天群里，请分析群用户消息和上文群聊内容
       1、只能从给定的标签列表中选择最相关的标签，可选标签：${allTags.join(', ')}。
@@ -133,7 +138,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       id: 'ai7', 
       name: "DeepSeek", 
       personality: "deepseek-r1",
-      model: modelConfigs[3].model,
+      model: modelConfigs[4].model,
       avatar: "/img/ds.svg",
       custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
       tags: ["深度推理", "编程", "文字游戏", "数学", "信息总结"]

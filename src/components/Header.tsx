@@ -22,7 +22,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-end">
           <GitHubButton 
             href="https://github.com/maojindao55/botgroup.chat"
-            data-color-scheme="no-preference: light; light: light; dark: dark;"
+            data-color-scheme="no-preference: light; light: light; dark: light;"
             data-size="large"
             data-show-count="true"
             aria-label="Star maojindao55/botgroup.chat on GitHub"
