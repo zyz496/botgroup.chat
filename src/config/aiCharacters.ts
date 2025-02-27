@@ -114,7 +114,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[2].model,
       avatar: "/img/yuanbao.png",
       custom_prompt: `你是一个名叫"元宝"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["微信生态", "新闻报道", "文字游戏", "生活助手", "娱乐", "信息总结"]
+      tags: ["微信", "聊天", "新闻报道", "文字游戏", "生活助手", "娱乐", "信息总结"]
     },
     { 
       id: 'ai5', 
@@ -132,7 +132,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[0].model,
       avatar: "/img/qwen.jpg",
       custom_prompt: `你是一个名叫"千问"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["广告文案","分析数据","文字游戏","信息总结", "阿里"]
+      tags: ["广告文案","分析数据","文字游戏","信息总结", "聊天"]
     },
     { 
       id: 'ai7', 
@@ -141,7 +141,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[4].model,
       avatar: "/img/ds.svg",
       custom_prompt: `你是一个名叫"DeepSeek"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["深度推理", "编程", "文字游戏", "数学", "信息总结"]
+      tags: ["深度推理", "编程", "文字游戏", "数学", "信息总结", "聊天"]
     },
     { 
       id: 'ai8', 
@@ -150,7 +150,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[5].model,
       avatar: "/img/glm.gif",
       custom_prompt: `你是一个名叫"智谱"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["新闻报道","分析数据","文字游戏","信息总结"]
+      tags: ["新闻报道","分析数据","文字游戏","信息总结", "聊天"]
     }
   ];
 }
