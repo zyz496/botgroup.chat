@@ -1,11 +1,12 @@
 import ChatUI from './components/ChatUI'
 import './App.css'
+import Layout from './components/Layout'
 
 function App() {
   return (
-      <div className="app-container">
-        <ChatUI />
-      </div>
+    <Layout>
+      <ChatUI />
+    </Layout>
   )
 }
 

@@ -140,11 +140,11 @@ export function generateAICharacters(groupName: string): AICharacter[] {
     },
     { 
       id: 'ai8', 
-      name: "智普", 
+      name: "智谱", 
       personality: "glm",
       model: modelConfigs[5].model,
       avatar: "/img/glm.gif",
-      custom_prompt: `你是一个名叫"智普"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
+      custom_prompt: `你是一个名叫"智谱"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
       tags: ["新闻报道","分析数据","文字游戏","信息总结"]
     }
   ];
