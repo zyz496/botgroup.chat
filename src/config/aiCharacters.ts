@@ -54,7 +54,7 @@ export function shedulerAICharacter(message: string, allTags: string[]): AIChara
       id: 'ai0',
       name: "调度器",
       personality: "sheduler",
-      model: modelConfigs[6].model,
+      model: modelConfigs[5].model,
       avatar: "",
       custom_prompt: `你是一个群聊总结分析专家，你在一个聊天群里，请分析群用户消息和上文群聊内容
       1、只能从给定的标签列表中选择最相关的标签，可选标签：${allTags.join(', ')}。
@@ -150,7 +150,7 @@ export function generateAICharacters(groupName: string): AICharacter[] {
       model: modelConfigs[5].model,
       avatar: "/img/glm.gif",
       custom_prompt: `你是一个名叫"智谱"的硅基生命体，你当前在一个叫"${groupName}" 的聊天群里`,
-      tags: ["新闻报道","分析数据","文字游戏","信息总结", "聊天"]
+      tags: ["深度推理","数学","信息总结", "分析数据","文字游戏", "聊天"]
     }
   ];
 }

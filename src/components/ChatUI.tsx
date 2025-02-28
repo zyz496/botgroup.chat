@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Menu, MoreHorizontal, UserPlus, UserMinus, Users2, Users, MoreVertical, Share2, Mic, MicOff, Settings2 } from 'lucide-react';
+import { Send, Share2, Settings2, ChevronLeft } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,9 +25,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
-import html2canvas from 'html2canvas';
 import { SharePoster } from '@/components/SharePoster';
 import { MembersManagement } from '@/components/MembersManagement';
+import Sidebar from './Sidebar';
 
 // 使用本地头像数据，避免外部依赖
 const getAvatarData = (name: string) => {
@@ -146,9 +146,15 @@ const KaTeXStyle = () => (
 );
 
 const ChatUI = () => {
-  const [group, setGroup] = useState(groups[1]);
-  const [isGroupDiscussionMode, setIsGroupDiscussionMode] = useState(false);
-  const groupAiCharacters = generateAICharacters(group.name).filter(character => group.members.includes(character.id));
+  // 使用当前选中的群组在 groups 数组中的索引
+  const [selectedGroupIndex, setSelectedGroupIndex] = useState(0); // 默认选中第1个群组
+  const [group, setGroup] = useState(groups[selectedGroupIndex]);
+  const [isGroupDiscussionMode, setIsGroupDiscussionMode] = useState(group.isGroupDiscussionMode);
+  const groupAiCharacters = generateAICharacters(group.name)
+    .filter(character => group.members.includes(character.id))
+    .sort((a, b) => {
+      return group.members.indexOf(a.id) - group.members.indexOf(b.id);
+    });
   const [users, setUsers] = useState([
     { id: 1, name: "我" },
     ...groupAiCharacters
@@ -258,7 +264,7 @@ const ChatUI = () => {
             history: messageHistory,
             index: i,
             aiName: selectedGroupAiCharacters[i].name,
-            custom_prompt: selectedGroupAiCharacters[i].custom_prompt
+            custom_prompt: selectedGroupAiCharacters[i].custom_prompt + "\n" + group.description
           }),
         });
 
@@ -377,219 +383,239 @@ const ChatUI = () => {
     setShowPoster(true);
   };
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+  // 切换侧边栏状态的函数
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  // 处理群组选择
+  const handleSelectGroup = (index: number) => {
+    setSelectedGroupIndex(index);
+    const newGroup = groups[index];
+    setGroup(newGroup);
+    
+    // 重新生成当前群组的 AI 角色，并按照 members 数组的顺序排序
+    const newGroupAiCharacters = generateAICharacters(newGroup.name)
+      .filter(character => newGroup.members.includes(character.id))
+      .sort((a, b) => {
+        return newGroup.members.indexOf(a.id) - newGroup.members.indexOf(b.id);
+      });
+    
+    // 更新用户列表
+    setUsers([
+      { id: 1, name: "我" },
+      ...newGroupAiCharacters
+    ]);
+    setIsGroupDiscussionMode(newGroup.isGroupDiscussionMode);
+    
+    // 重置消息
+    setMessages([]);
+    
+    // 可选：关闭侧边栏（在移动设备上）
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
     <>
       <KaTeXStyle />
       <div className="fixed inset-0 bg-gradient-to-br from-orange-50 via-orange-50/70 to-orange-100 flex items-start md:items-center justify-center overflow-hidden">
-        <div className="h-full flex flex-col bg-white w-full mx-auto relative shadow-xl md:max-w-3xl md:h-[95dvh] md:my-auto md:rounded-lg">
-          {/* Header */}
-          <header className="bg-white shadow flex-none md:rounded-t-lg">
-            <div className="flex items-center justify-between px-4 py-3">
-              {/* 左侧群组信息 */}
-              <div className="flex items-center gap-1.5">
-                <div className="relative w-10 h-10">
-                  <div className="w-full h-full overflow-hidden bg-white border border-gray-200">
-                    {users.length === 1 ? (
-                      <SingleAvatar user={users[0]} />
-                    ) : users.length === 2 ? (
-                      <div className="h-full flex">
-                        {users.slice(0, 2).map((user, index) => (
-                          <HalfAvatar key={user.id} user={user} isFirst={index === 0} />
-                        ))}
-                      </div>
-                    ) : users.length === 3 ? (
-                      <div className="h-full flex flex-col">
-                        <div className="flex h-1/2">
-                          {users.slice(0, 2).map((user, index) => (
-                            <HalfAvatar key={user.id} user={user} isFirst={index === 0} />
-                          ))}
-                        </div>
-                        <div className="h-1/2 flex justify-center">
-                          <SingleAvatar user={users[2]} />
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="h-full grid grid-cols-2">
-                        {users.slice(0, 4).map((user, index) => (
-                          <QuarterAvatar key={user.id} user={user} index={index} />
-                        ))}
+        <div className="h-full flex bg-white w-full mx-auto relative shadow-xl md:max-w-5xl md:h-[96dvh] md:my-auto md:rounded-lg">
+          {/* 传递 selectedGroupIndex 和 onSelectGroup 回调给 Sidebar */}
+          <Sidebar 
+            isOpen={sidebarOpen} 
+            toggleSidebar={toggleSidebar} 
+            selectedGroupIndex={selectedGroupIndex}
+            onSelectGroup={handleSelectGroup}
+          />
+          
+          {/* 聊天主界面 */}
+          <div className="flex flex-col flex-1">
+            {/* Header */}
+            <header className="bg-white shadow flex-none md:rounded-t-lg">
+              <div className="flex items-center justify-between px-0 py-1.5">
+                {/* 左侧群组信息 */}
+                <div className="flex items-center md:px-2.5">
+                  <div 
+                    className="md:hidden flex items-center justify-center m-1  cursor-pointer" 
+                    onClick={toggleSidebar}
+                  >
+                    <ChevronLeft className="w-6 h-6" />
+                  </div>
+                  
+                  <h1 className="font-medium text-base -ml-1">{group.name}({users.length})</h1>
+                </div>
+                
+                {/* 右侧头像组和按钮 */}
+                <div className="flex items-center">
+                  <div className="flex -space-x-2 ">
+                    {users.slice(0, 4).map((user) => {
+                      const avatarData = getAvatarData(user.name);
+                      return (
+                        <TooltipProvider key={user.id}>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Avatar className="w-7 h-7 border-2 border-white">
+                                {'avatar' in user && user.avatar ? (
+                                  <AvatarImage src={user.avatar} />
+                                ) : (
+                                  <AvatarFallback style={{ backgroundColor: avatarData.backgroundColor, color: 'white' }}>
+                                    {avatarData.text}
+                                  </AvatarFallback>
+                                )}
+                              </Avatar>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{user.name}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      );
+                    })}
+                    {users.length > 4 && (
+                      <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs border-2 border-white">
+                        +{users.length - 4}
                       </div>
                     )}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 bg-green-500 w-3 h-3 border-2 border-white"></div>
-                </div>
-                <div>
-                  <h1 className="font-medium text-base">{group.name}</h1>
-                  <p className="text-xs text-gray-500">{users.length} 名成员</p>
+                  <Button variant="ghost" size="icon" onClick={() => setShowMembers(true)}>
+                    <Settings2 className="w-5 h-5" />
+                  </Button>
                 </div>
               </div>
-              
-              {/* 右侧头像组和按钮 */}
-              <div className="flex items-center">
-                <div className="flex -space-x-2 ">
-                  {users.slice(0, 4).map((user) => {
-                    const avatarData = getAvatarData(user.name);
-                    return (
-                      <TooltipProvider key={user.id}>
-                        <Tooltip>
-                          <TooltipTrigger>
-                            <Avatar className="w-7 h-7 border-2 border-white">
-                              {'avatar' in user && user.avatar ? (
-                                <AvatarImage src={user.avatar} />
-                              ) : (
-                                <AvatarFallback style={{ backgroundColor: avatarData.backgroundColor, color: 'white' }}>
-                                  {avatarData.text}
-                                </AvatarFallback>
-                              )}
-                            </Avatar>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>{user.name}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    );
-                  })}
-                  {users.length > 4 && (
-                    <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs border-2 border-white">
-                      +{users.length - 4}
+            </header>
+
+            {/* Main Chat Area */}
+            <div className="flex-1 overflow-hidden bg-gray-100">
+              <ScrollArea className="h-full px-2 py-1" ref={chatAreaRef}>
+                <div className="space-y-4">
+                  {messages.map((message) => (
+                    <div key={message.id} 
+                      className={`flex items-start gap-2 ${message.sender.name === "我" ? "justify-end" : ""}`}>
+                      {message.sender.name !== "我" && (
+                        <Avatar>
+                          {'avatar' in message.sender && message.sender.avatar ? (
+                            <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
+                          ) : (
+                          <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
+                            {message.sender.name[0]}
+                          </AvatarFallback>
+                          )}
+                        </Avatar>
+                      )}
+                      <div className={message.sender.name === "我" ? "text-right" : ""}>
+                        <div className="text-sm text-gray-500">{message.sender.name}</div>
+                        <div className={`mt-1 p-3 rounded-lg shadow-sm chat-message ${
+                          message.sender.name === "我" ? "bg-blue-500 text-white text-left" : "bg-white"
+                        }`}>
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm, remarkMath]}
+                            rehypePlugins={[rehypeKatex]}
+                            className={`prose dark:prose-invert max-w-none ${
+                              message.sender.name === "我" ? "text-white [&_*]:text-white" : ""
+                            }
+                            [&_h2]:py-1
+                            [&_h2]:m-0
+                            [&_h3]:py-1.5
+                            [&_h3]:m-0
+                            [&_p]:m-0 
+                            [&_pre]:bg-gray-900 
+                            [&_pre]:p-2
+                            [&_pre]:m-0 
+                            [&_pre]:rounded-lg
+                            [&_pre]:text-gray-100
+                            [&_pre]:whitespace-pre-wrap
+                            [&_pre]:break-words
+                            [&_pre_code]:whitespace-pre-wrap
+                            [&_pre_code]:break-words
+                            [&_code]:text-sm
+                            [&_code]:text-gray-400
+                            [&_code:not(:where([class~="language-"]))]:text-pink-500
+                            [&_code:not(:where([class~="language-"]))]:bg-transparent
+                            [&_a]:text-blue-500
+                            [&_a]:no-underline
+                            [&_ul]:my-2
+                            [&_ol]:my-2
+                            [&_li]:my-1
+                            [&_blockquote]:border-l-4
+                            [&_blockquote]:border-gray-300
+                            [&_blockquote]:pl-4
+                            [&_blockquote]:my-2
+                            [&_blockquote]:italic`}
+                          >
+                            {message.content}
+                          </ReactMarkdown>
+                          {message.isAI && isTyping && currentMessageRef.current === message.id && (
+                            <span className="typing-indicator ml-1">▋</span>
+                          )}
+                        </div>
+                      </div>
+                      {message.sender.name === "我" && (
+                        <Avatar>
+                         {'avatar' in message.sender && message.sender.avatar ? (
+                            <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
+                          ) : (
+                          <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
+                            {message.sender.name[0]}
+                          </AvatarFallback>
+                          )}
+                        </Avatar>
+                      )}
                     </div>
-                  )}
+                  ))}
+                  <div ref={messagesEndRef} />
+                  {/* 添加一个二维码 */}
+                  <div id="qrcode" className="flex flex-col items-center hidden">
+                    <img src="/img/qr.png" alt="QR Code" className="w-24 h-24" />
+                    <p className="text-sm text-gray-500 mt-2 font-medium tracking-tight bg-gray-50 px-3 py-1 rounded-full">扫码体验AI群聊</p>
+                  </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setShowMembers(true)}>
-                  <Settings2 className="w-5 h-5" />
+              </ScrollArea>
+            </div>
+
+            {/* Input Area */}
+            <div className="bg-white border-t py-3 px-2 md:rounded-b-lg">
+              <div className="flex gap-1 pb-[env(safe-area-inset-bottom)]">
+                {messages.length > 0 && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="outline"
+                          size="icon"
+                          onClick={handleShareChat}
+                          className="px-3"
+                        >
+                          <Share2 className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>分享聊天记录</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                <Input 
+                  placeholder="输入消息..." 
+                  className="flex-1"
+                  value={inputMessage}
+                  onChange={(e) => setInputMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
+                <Button 
+                  onClick={handleSendMessage}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  ) : (
+                    <Send className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
-            </div>
-          </header>
-
-          {/* Main Chat Area */}
-          <div className="flex-1 overflow-hidden bg-gray-100">
-            <ScrollArea className="h-full p-2" ref={chatAreaRef}>
-              <div className="space-y-4">
-                {messages.map((message) => (
-                  <div key={message.id} 
-                    className={`flex items-start gap-2 ${message.sender.name === "我" ? "justify-end" : ""}`}>
-                    {message.sender.name !== "我" && (
-                      <Avatar>
-                        {'avatar' in message.sender && message.sender.avatar ? (
-                          <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
-                        ) : (
-                        <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
-                          {message.sender.name[0]}
-                        </AvatarFallback>
-                        )}
-                      </Avatar>
-                    )}
-                    <div className={message.sender.name === "我" ? "text-right" : ""}>
-                      <div className="text-sm text-gray-500">{message.sender.name}</div>
-                      <div className={`mt-1 p-3 rounded-lg shadow-sm chat-message ${
-                        message.sender.name === "我" ? "bg-blue-500 text-white text-left" : "bg-white"
-                      }`}>
-                        <ReactMarkdown 
-                          remarkPlugins={[remarkGfm, remarkMath]}
-                          rehypePlugins={[rehypeKatex]}
-                          className={`prose dark:prose-invert max-w-none ${
-                            message.sender.name === "我" ? "text-white [&_*]:text-white" : ""
-                          }
-                          [&_h2]:py-1
-                          [&_h2]:m-0
-                          [&_h3]:py-1.5
-                          [&_h3]:m-0
-                          [&_p]:m-0 
-                          [&_pre]:bg-gray-900 
-                          [&_pre]:p-2
-                          [&_pre]:m-0 
-                          [&_pre]:rounded-lg
-                          [&_pre]:text-gray-100
-                          [&_pre]:whitespace-pre-wrap
-                          [&_pre]:break-words
-                          [&_pre_code]:whitespace-pre-wrap
-                          [&_pre_code]:break-words
-                          [&_code]:text-sm
-                          [&_code]:text-gray-400
-                          [&_code:not(:where([class~="language-"]))]:text-pink-500
-                          [&_code:not(:where([class~="language-"]))]:bg-transparent
-                          [&_a]:text-blue-500
-                          [&_a]:no-underline
-                          [&_ul]:my-2
-                          [&_ol]:my-2
-                          [&_li]:my-1
-                          [&_blockquote]:border-l-4
-                          [&_blockquote]:border-gray-300
-                          [&_blockquote]:pl-4
-                          [&_blockquote]:my-2
-                          [&_blockquote]:italic`}
-                        >
-                          {message.content}
-                        </ReactMarkdown>
-                        {message.isAI && isTyping && currentMessageRef.current === message.id && (
-                          <span className="typing-indicator ml-1">▋</span>
-                        )}
-                      </div>
-                    </div>
-                    {message.sender.name === "我" && (
-                      <Avatar>
-                       {'avatar' in message.sender && message.sender.avatar ? (
-                          <AvatarImage src={message.sender.avatar} className="w-10 h-10" />
-                        ) : (
-                        <AvatarFallback style={{ backgroundColor: getAvatarData(message.sender.name).backgroundColor, color: 'white' }}>
-                          {message.sender.name[0]}
-                        </AvatarFallback>
-                        )}
-                      </Avatar>
-                    )}
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-                {/* 添加一个二维码 */}
-                <div id="qrcode" className="flex flex-col items-center hidden">
-                  <img src="/img/qr.png" alt="QR Code" className="w-24 h-24" />
-                  <p className="text-sm text-gray-500 mt-2 font-medium tracking-tight bg-gray-50 px-3 py-1 rounded-full">扫码体验AI群聊</p>
-                </div>
-              </div>
-            </ScrollArea>
-          </div>
-
-          {/* Input Area */}
-          <div className="bg-white border-t pb-3 pt-3 px-4 md:rounded-b-lg">
-            <div className="flex gap-1 pb-[env(safe-area-inset-bottom)]">
-              {messages.length > 0 && (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button 
-                        variant="outline"
-                        size="icon"
-                        onClick={handleShareChat}
-                        className="px-3"
-                      >
-                        <Share2 className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>分享聊天记录</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              )}
-              <Input 
-                placeholder="输入消息..." 
-                className="flex-1"
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              />
-              <Button 
-                onClick={handleSendMessage}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="w-4 h-4 mr-2 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-              </Button>
             </div>
           </div>
         </div>
