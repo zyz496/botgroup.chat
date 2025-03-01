@@ -31,7 +31,7 @@ export const modelConfigs = [
     baseURL: "https://open.bigmodel.cn/api/paas/v4/"
   },
   {
-    model: "qwen-turbo",//调度模型
+    model: "sk-5910f3f64f294e1bb3d8e4bfb657e576",//调度模型
     apiKey: "DASHSCOPE_API_KEY", // 这里存储环境变量的 key 名称
     baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
   },
