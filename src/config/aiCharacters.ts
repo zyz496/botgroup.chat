@@ -17,7 +17,7 @@ export const modelConfigs = [
   },
   {
     model: "AKLTMTQ1YzM0YjY5YmE3NDhlZTljODg2YThmOWEwMGY0Yzc",//豆包模型|火山引擎接入点（改成自己的）
-    apiKey: "TURRMk1XVmhOVFkwT1dJeU5HRm1Zamd5WWpJME5tRmlPRGhrTXpWaFl6Zw==",
+    apiKey: "ARK_API_KEY",
     baseURL: "https://ark.cn-beijing.volces.com/api/v3"
   },
   {
