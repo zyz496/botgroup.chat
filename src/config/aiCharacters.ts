@@ -22,7 +22,7 @@ export const modelConfigs = [
   },
   {
     model: "sk-073594730b6d4207888c1ca378e1fd1d",//deepseek-r火山引擎接入点（改成自己的）
-    apiKey: "ARK_API_KEY",
+    apiKey: "DeepSeek",
     baseURL: "https://ark.cn-beijing.volces.com/api/v3"
   },
   {
